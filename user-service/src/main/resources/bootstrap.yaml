@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: user-service
+  cloud:
+    nacos:
+      server-addr: 47.122.57.2:8848
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: swagger-config.yaml
+          - data-id: jdbc-config.yaml
+          - data-id: openfeign-config.yaml

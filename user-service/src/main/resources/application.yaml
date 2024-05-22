@@ -1,0 +1,11 @@
+server:
+  port: 8087
+
+iot:
+  name: 项目
+  mysql:
+    url: 47.122.57.2
+    port: 3306
+    username: iotcloud
+    password: ziLRMXPepHKRNjNZ
+    base: iotcloud

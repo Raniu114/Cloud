@@ -56,7 +56,7 @@ public class TokenGlobalFilter implements GlobalFilter, Ordered {
             data.put("status", -1);
             return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
         }
-        String accessToken = cookies.get("AccessToken").toString();
+        String accessToken = cookies.get("AccessToken").get(0).getValue();
         String user = TokenUtil.verifyUser(accessToken);
         if ("-1".equals(user)) {
             data.put("msg", "token过期");

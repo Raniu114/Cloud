@@ -205,8 +205,7 @@ public class ProjectController {
             @ApiResponse(code = 403, message = "权限不足"),
             @ApiResponse(code = 412, message = "参数缺失或找不到用户")
     })
-    public String selectProject(@RequestHeader("permissions") String permissions,@RequestHeader("user") String user, @RequestParam String key,@RequestParam Integer page,@RequestParam Integer size,HttpServletResponse response,HttpServletRequest request){
-        System.out.println(permissions);
+    public String selectProject(@RequestHeader(name = "permissions") String permissions,@RequestHeader(name = "user") String user, @RequestParam(name = "key") String key,@RequestParam(name = "page") String page,@RequestParam(name = "size") String size,HttpServletResponse response,HttpServletRequest request){
         JSONObject jsonObject = new JSONObject();
         if (key == null) {
             response.setStatus(412);
@@ -217,9 +216,9 @@ public class ProjectController {
 
         Page<ProjectPo> projects;
         if (Integer.parseInt(permissions) > 1) {
-            projects = this.projectService.select(key, page, size);
+            projects = this.projectService.select(key, Integer.parseInt(page), Integer.parseInt(size));
         }else {
-            projects = this.projectService.select(key,Long.parseLong(user),page,size);
+            projects = this.projectService.select(key,Long.parseLong(user),Integer.parseInt(page), Integer.parseInt(size));
         }
         jsonObject.put("status",1);
         jsonObject.put("msg","获取成功");

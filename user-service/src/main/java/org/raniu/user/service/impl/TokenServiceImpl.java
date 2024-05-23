@@ -1,11 +1,10 @@
 package org.raniu.user.service.impl;
 
+import org.raniu.api.dto.UserDTO;
 import org.raniu.common.utils.TokenUtil;
-import org.raniu.user.domain.po.UserPo;
 import org.raniu.user.service.TokenService;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 
 /**
  * @projectName: cloud
@@ -19,43 +18,31 @@ import java.util.Map;
 @Service
 public class TokenServiceImpl implements TokenService {
 
-    protected TokenUtil tokenUtil = new TokenUtil();
-
     @Override
-    public String getAccessToken(UserPo user) {
+    public String getAccessToken(UserDTO user) {
         if (user == null) {
             return null;
         } else {
-            return tokenUtil.accessToken(user.getPermissions(), user.getId());
+            return TokenUtil.getAccessToken(user);
         }
     }
 
     @Override
-    public String getRefreshToken(UserPo user) {
+    public String getRefreshToken(UserDTO user) {
         if (user == null) {
             return null;
         } else {
-            return tokenUtil.refreshToken(user.getId());
+            return TokenUtil.getRefreshToken(user);
         }
     }
 
     @Override
     public int verifyPermissions(String token) {
-        Map<String, String> map = tokenUtil.verify(token);
-        if (map != null) {
-            return Integer.parseInt(map.get("permission"));
-        } else {
-            return -1;
-        }
+        return Integer.parseInt(TokenUtil.verifyPermissions(token));
     }
 
     @Override
     public Long verifyUser(String token) {
-        Map<String, String> map = tokenUtil.verify(token);
-        if (map != null) {
-            return Long.valueOf(map.get("user"));
-        } else {
-            return null;
-        }
+        return Long.parseLong(TokenUtil.verifyUser(token));
     }
 }

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.json.JSONObject;
+import org.raniu.api.dto.UserDTO;
 import org.raniu.user.domain.po.UserPo;
 import org.raniu.user.domain.vo.UserLoginVo;
 import org.raniu.user.service.RSAService;
@@ -61,27 +62,31 @@ public class UserController {
             return jsonObject.toString();
         }
         UserPo user = this.userService.login(userLoginVo);
-        if (user == null || user.getPermissions() != 2) {
+        if (user == null || user.getPermissions() != 1) {
             response.setStatus(412);
             jsonObject.put("status", -1);
             jsonObject.put("msg", "用户不存在");
-        } else {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "登陆成功");
-            jsonObject.put("user", BeanMap.create(user));
-            Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(user));
-            cookie.setMaxAge(30 * 60);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setDomain("zhxy.fjhnkj.com");
-            Cookie cookie1 = new Cookie("RefreshToken", this.tokenService.getRefreshToken(user));
-            cookie1.setSecure(true);
-            cookie1.setMaxAge(30 * 24 * 60 * 60);
-            cookie1.setPath("/");
-            cookie1.setDomain("zhxy.fjhnkj.com");
-            response.addCookie(cookie);
-            response.addCookie(cookie1);
         }
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setPermissions(user.getPermissions());
+        userDTO.setUsername(user.getUsername());
+        jsonObject.put("status", 1);
+        jsonObject.put("msg", "登陆成功");
+        jsonObject.put("user", BeanMap.create(userDTO));
+        response.setStatus(200);
+        Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
+        cookie.setMaxAge(30 * 60);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setDomain("zhxy.fjhnkj.com");
+        Cookie cookie1 = new Cookie("RefreshToken", this.tokenService.getRefreshToken(userDTO));
+        cookie1.setSecure(true);
+        cookie1.setMaxAge(30 * 24 * 60 * 60);
+        cookie1.setPath("/");
+        cookie1.setDomain("zhxy.fjhnkj.com");
+        response.addCookie(cookie);
+        response.addCookie(cookie1);
         return jsonObject.toString();
     }
 
@@ -109,23 +114,28 @@ public class UserController {
             response.setStatus(412);
             jsonObject.put("status", -1);
             jsonObject.put("msg", "用户不存在");
-        } else {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "登陆成功");
-            jsonObject.put("user", BeanMap.create(user));
-            Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(user));
-            cookie.setMaxAge(30 * 60);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setDomain("zhxy.fjhnkj.com");
-            Cookie cookie1 = new Cookie("RefreshToken", this.tokenService.getRefreshToken(user));
-            cookie1.setSecure(true);
-            cookie1.setMaxAge(30 * 24 * 60 * 60);
-            cookie1.setPath("/");
-            cookie1.setDomain("zhxy.fjhnkj.com");
-            response.addCookie(cookie);
-            response.addCookie(cookie1);
         }
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setPermissions(user.getPermissions());
+        userDTO.setUsername(user.getUsername());
+
+        jsonObject.put("status", 1);
+        jsonObject.put("msg", "登陆成功");
+        jsonObject.put("user", BeanMap.create(user));
+        Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
+        cookie.setMaxAge(30 * 60);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setDomain("zhxy.fjhnkj.com");
+        Cookie cookie1 = new Cookie("RefreshToken", this.tokenService.getRefreshToken(userDTO));
+        cookie1.setSecure(true);
+        cookie1.setMaxAge(30 * 24 * 60 * 60);
+        cookie1.setPath("/");
+        cookie1.setDomain("zhxy.fjhnkj.com");
+        response.addCookie(cookie);
+        response.addCookie(cookie1);
+
         return jsonObject.toString();
     }
 
@@ -151,10 +161,14 @@ public class UserController {
             jsonObject.put("msg", "用户不存在");
             return jsonObject.toString();
         }
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setPermissions(user.getPermissions());
+        userDTO.setUsername(user.getUsername());
         jsonObject.put("status", 1);
         jsonObject.put("msg", "获取成功");
         jsonObject.put("user", BeanMap.create(user));
-        Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(user));
+        Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
         cookie.setMaxAge(30 * 60);
         cookie.setPath("/");
         cookie.setSecure(true);

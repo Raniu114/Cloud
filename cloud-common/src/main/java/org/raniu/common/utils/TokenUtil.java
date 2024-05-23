@@ -6,7 +6,6 @@ import org.raniu.api.dto.UserDTO;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * @projectName: raniu-cloud_disk
@@ -49,6 +48,7 @@ public class TokenUtil {
     public static Map<String,String> verify(String token) {
         Map<String,String> data = new HashMap<>();
         try {
+            System.out.println(token);
             Claims claims = Jwts.parser().setSigningKey(TOKEN_SECRET).parseClaimsJws(token).getBody();
 
             if (claims.get("permission") != null) {

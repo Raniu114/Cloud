@@ -1,5 +1,10 @@
 server:
   port: 8082
+  ssl:
+    key-store: ./zhxy.fjhnkj.com.jks
+    key-store-password: 5or4udyq
+    key-store-type: JKS
+    enabled: true
 iot:
   auth:
     excludePaths:

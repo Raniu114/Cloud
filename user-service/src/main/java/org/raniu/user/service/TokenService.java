@@ -1,5 +1,6 @@
 package org.raniu.user.service;
 
+import org.raniu.api.dto.UserDTO;
 import org.raniu.user.domain.po.UserPo;
 
 /**
@@ -13,9 +14,9 @@ import org.raniu.user.domain.po.UserPo;
  */
 public interface TokenService {
 
-    String getAccessToken(UserPo user);
+    String getAccessToken(UserDTO user);
 
-    String getRefreshToken(UserPo user);
+    String getRefreshToken(UserDTO user);
 
     int verifyPermissions(String token);
 

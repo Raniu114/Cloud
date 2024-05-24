@@ -1,13 +1,17 @@
 package org.raniu.project.controller;
 
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.json.JSONObject;
 
+import org.raniu.common.utils.UserContext;
 import org.raniu.project.domain.po.ProjectPo;
 import org.raniu.project.domain.vo.ProjectVo;
 import org.raniu.project.service.ProjectService;
@@ -16,7 +20,6 @@ import org.springframework.cglib.beans.BeanMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
-
 
 
 /**
@@ -30,25 +33,29 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 @RestController
 @RequestMapping("/project")
-@Api(tags = "项目接口", value = "项目接口")
+@Tag(name = "项目接口", description = "项目管理")
 public class ProjectController {
 
     @Autowired
     private ProjectService projectService;
 
-    @PutMapping("/add")
-    @ApiOperation(value = "添加项目", notes = "添加项目")
-    @ApiImplicitParam(name = "AccessToken", value = "AccessToken", required = true, dataType = "String", paramType = "header")
-    @ApiResponses({
-            @ApiResponse(code = 401, message = "未携带token"),
-            @ApiResponse(code = 403, message = "权限不足"),
-            @ApiResponse(code = 412, message = "id可能重复")
-    })
+    @PostMapping("/add")
+    @Operation(summary = "添加项目", description = "添加项目")
+    @ApiResponse(responseCode = "401", description = "未携带token")
+    @ApiResponse(responseCode = "403", description = "权限不足")
+    @ApiResponse(responseCode = "412", description = "id可能重复")
     public String addProject(@RequestBody @Valid ProjectVo projectVo, BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) {
         for (ObjectError error : bindingResult.getAllErrors()) {
             return error.getDefaultMessage();
         }
         JSONObject jsonObject = new JSONObject();
+        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
+        if ("write".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
+            response.setStatus(403);
+            jsonObject.put("status", -1);
+            jsonObject.put("msg", "权限不足");
+            return jsonObject.toString();
+        }
         ProjectPo projectPo = new ProjectPo();
         projectPo.setId(projectVo.getId());
         projectPo.setName(projectVo.getName());
@@ -65,18 +72,22 @@ public class ProjectController {
     }
 
     @PostMapping("/update")
-    @ApiOperation(value = "更新项目信息", notes = "更新项目信息")
-    @ApiImplicitParam(name = "AccessToken", value = "AccessToken", required = true, dataType = "String", paramType = "header")
-    @ApiResponses({
-            @ApiResponse(code = 401, message = "未携带token"),
-            @ApiResponse(code = 403, message = "权限不足"),
-            @ApiResponse(code = 412, message = "找不到项目")
-    })
+    @Operation(summary = "更新项目信息", description = "更新项目信息")
+    @ApiResponse(responseCode = "401", description = "未携带token")
+    @ApiResponse(responseCode = "403", description = "权限不足")
+    @ApiResponse(responseCode = "412", description = "id可能重复")
     public String updateProject(@RequestBody @Valid ProjectVo projectVo, BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) {
         for (ObjectError error : bindingResult.getAllErrors()) {
             return error.getDefaultMessage();
         }
         JSONObject jsonObject = new JSONObject();
+        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
+        if ("write".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
+            response.setStatus(403);
+            jsonObject.put("status", -1);
+            jsonObject.put("msg", "权限不足");
+            return jsonObject.toString();
+        }
         ProjectPo projectPo = new ProjectPo();
         projectPo.setOwner(projectVo.getOwner());
         projectPo.setName(projectVo.getName());
@@ -92,20 +103,24 @@ public class ProjectController {
         return jsonObject.toString();
     }
 
-    @DeleteMapping("/delete")
-    @ApiOperation(value = "删除项目", notes = "删除项目")
-    @ApiResponses({
-            @ApiResponse(code = 401, message = "未携带token"),
-            @ApiResponse(code = 403, message = "权限不足"),
-            @ApiResponse(code = 412, message = "参数缺失或找不到项目")
-    })
-    @ApiImplicitParam(name = "AccessToken", value = "AccessToken", required = true, dataType = "String", paramType = "header")
-    public String deleteProject(@RequestParam String id, HttpServletResponse response, HttpServletRequest request) {
+    @PostMapping("/delete")
+    @Operation(summary = "删除项目", description = "删除项目")
+    @ApiResponse(responseCode = "401", description = "未携带token")
+    @ApiResponse(responseCode = "403", description = "权限不足")
+    @ApiResponse(responseCode = "412", description = "id可能重复")
+    public String deleteProject(@RequestParam(name = "id",value = "项目id") String id, HttpServletResponse response, HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         if (id == null) {
             response.setStatus(412);
             jsonObject.put("status", -1);
             jsonObject.put("msg", "参数不可为空");
+            return jsonObject.toString();
+        }
+        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
+        if ("write".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
+            response.setStatus(403);
+            jsonObject.put("status", -1);
+            jsonObject.put("msg", "权限不足");
             return jsonObject.toString();
         }
         if (this.projectService.removeById(id)) {
@@ -120,18 +135,11 @@ public class ProjectController {
     }
 
     @GetMapping("/list")
-    @ApiOperation(value = "项目列表", notes = "项目列表,如果为管理员用户则查询全部项目，如果为普通用户则查询名下项目")
-    @ApiResponses({
-            @ApiResponse(code = 401, message = "未携带token"),
-            @ApiResponse(code = 403, message = "权限不足"),
-            @ApiResponse(code = 412, message = "参数缺失或没有项目")
-    })
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "AccessToken", value = "AccessToken", required = true, dataType = "String", paramType = "header"),
-            @ApiImplicitParam(name = "page", value = "分页页码", required = true, dataType = "Integer", paramType = "query"),
-            @ApiImplicitParam(name = "size", value = "单页长度", required = true, dataType = "Integer", paramType = "query"),
-    })
-    public String projectList(@RequestParam Integer page, @RequestParam Integer size, HttpServletRequest request, HttpServletResponse response) {
+    @Operation(summary = "项目列表", description = "项目列表,如果为管理员用户则查询全部项目，如果为普通用户则查询名下项目")
+    @ApiResponse(responseCode = "401", description = "未携带token")
+    @ApiResponse(responseCode = "403", description = "权限不足")
+    @ApiResponse(responseCode = "412", description = "id可能重复")
+    public String projectList(@RequestParam(name = "page", value = "页码") Integer page, @RequestParam(name = "size",value = "最大条数") Integer size, HttpServletRequest request, HttpServletResponse response) {
         JSONObject jsonObject = new JSONObject();
         if (page == null || size == null) {
             response.setStatus(412);
@@ -139,19 +147,24 @@ public class ProjectController {
             jsonObject.put("msg", "参数不可为空");
             return jsonObject.toString();
         }
+        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
+        if ("none".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
+            response.setStatus(403);
+            jsonObject.put("status", -1);
+            jsonObject.put("msg", "权限不足");
+            return jsonObject.toString();
+        }
         Page<ProjectPo> projects;
-        int permissions = (int)request.getAttribute("permissions");
-        Long user = (Long) request.getAttribute("user");
-        if(permissions >1){
+        if (UserContext.getPermissions() > 1) {
             projects = this.projectService.list(page, size);
-        }else{
-            projects = this.projectService.list(page, size, user);
+        } else {
+            projects = this.projectService.list(page, size, UserContext.getUser());
         }
         if (!projects.getRecords().isEmpty()) {
             jsonObject.put("status", 1);
             jsonObject.put("msg", "获取成功");
             jsonObject.put("projects", projects.getRecords());
-            jsonObject.put("pages",projects.getPages());
+            jsonObject.put("pages", projects.getPages());
         } else {
             response.setStatus(412);
             jsonObject.put("status", -1);
@@ -161,14 +174,11 @@ public class ProjectController {
     }
 
     @GetMapping("/get")
-    @ApiOperation(value = "获取项目", notes = "获取单个项目")
-    @ApiImplicitParam(name = "AccessToken", value = "AccessToken", required = true, dataType = "String", paramType = "header")
-    @ApiResponses({
-            @ApiResponse(code = 401, message = "未携带token"),
-            @ApiResponse(code = 403, message = "权限与操作不符"),
-            @ApiResponse(code = 412, message = "参数缺失或找不到项目")
-    })
-    public String getProject(@RequestParam String id, HttpServletResponse response, HttpServletRequest request) {
+    @Operation(summary = "获取项目", description = "获取单个项目")
+    @ApiResponse(responseCode = "401", description = "未携带token")
+    @ApiResponse(responseCode = "403", description = "权限不足")
+    @ApiResponse(responseCode = "412", description = "id可能重复")
+    public String getProject(@RequestParam(name = "id", value = "项目id") String id, HttpServletResponse response, HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         if (id == null) {
             response.setStatus(412);
@@ -176,19 +186,18 @@ public class ProjectController {
             jsonObject.put("msg", "参数不可为空");
             return jsonObject.toString();
         }
-        int permissions = (int)request.getAttribute("permissions");
-        Long user = (Long) request.getAttribute("user");
+        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
+        if ("none".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
+            response.setStatus(403);
+            jsonObject.put("status", -1);
+            jsonObject.put("msg", "权限不足");
+            return jsonObject.toString();
+        }
         ProjectPo projectPo = this.projectService.getById(id);
         if (projectPo == null) {
             response.setStatus(412);
             jsonObject.put("status", -1);
             jsonObject.put("msg", "未查询到项目");
-            return jsonObject.toString();
-        }
-        if (!projectPo.getOwner().equals(user) && permissions < 2) {
-            response.setStatus(403);
-            jsonObject.put("status", 0);
-            jsonObject.put("msg", "权限不足");
             return jsonObject.toString();
         }
         jsonObject.put("status", 1);
@@ -198,32 +207,11 @@ public class ProjectController {
     }
 
     @GetMapping("/select")
-    @ApiOperation(value = "查询项目", notes = "查询项目,可以提供名称关键词、所有者关键词进行查询")
-    @ApiImplicitParam(name = "AccessToken", value = "AccessToken", required = true, dataType = "String", paramType = "header")
-    @ApiResponses({
-            @ApiResponse(code = 401, message = "未携带token"),
-            @ApiResponse(code = 403, message = "权限不足"),
-            @ApiResponse(code = 412, message = "参数缺失或找不到用户")
-    })
-    public String selectProject(@RequestHeader(name = "permissions") String permissions,@RequestHeader(name = "user") String user, @RequestParam(name = "key") String key,@RequestParam(name = "page") String page,@RequestParam(name = "size") String size,HttpServletResponse response,HttpServletRequest request){
-        JSONObject jsonObject = new JSONObject();
-        if (key == null) {
-            response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
-        }
-
-        Page<ProjectPo> projects;
-        if (Integer.parseInt(permissions) > 1) {
-            projects = this.projectService.select(key, Integer.parseInt(page), Integer.parseInt(size));
-        }else {
-            projects = this.projectService.select(key,Long.parseLong(user),Integer.parseInt(page), Integer.parseInt(size));
-        }
-        jsonObject.put("status",1);
-        jsonObject.put("msg","获取成功");
-        jsonObject.put("projects",projects.getRecords());
-        jsonObject.put("pages",projects.getPages());
-        return jsonObject.toString();
+    @Operation(summary = "查询项目", description = "查询项目,可以提供名称关键词、所有者关键词进行查询")
+    @ApiResponse(responseCode = "401", description = "未携带token")
+    @ApiResponse(responseCode = "403", description = "权限不足")
+    @ApiResponse(responseCode = "412", description = "id可能重复")
+    public String selectProject(@RequestParam(name = "key",value = "关键词") String key, @RequestParam(name = "page",value = "页码") String page, @RequestParam(name = "size",value = "最大条数") String size, HttpServletResponse response, HttpServletRequest request) {
+        return this.projectService.selectProject(key, page, size, response);
     }
 }

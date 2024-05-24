@@ -57,26 +57,27 @@ public class TokenGlobalFilter implements GlobalFilter, Ordered {
             return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
         }
         String accessToken = cookies.get("AccessToken").get(0).getValue();
-        String user = TokenUtil.verifyUser(accessToken);
-        if ("-1".equals(user)) {
+        Map<String, String> user = TokenUtil.verify(accessToken);
+        String id = user.get("user");
+        if ("-1".equals(id)) {
             data.put("msg", "token过期");
             data.put("status", -2);
             return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
-        } else if ("-2".equals(user)) {
+        } else if ("-2".equals(id)) {
             data.put("msg", "token格式错误");
             data.put("status", -3);
             return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
-        } else if ("-3".equals(user)) {
+        } else if ("-3".equals(id)) {
             data.put("msg", "token签名错误");
             data.put("status", -4);
             return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
-        } else if ("-4".equals(user)) {
+        } else if ("-4".equals(id)) {
             data.put("msg", "token异常");
             data.put("status", -5);
             return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
         }
         exchange.mutate()
-                .request(builder -> builder.header("user", user).header("permissions", TokenUtil.verifyPermissions(accessToken))).build();
+                .request(builder -> builder.header("user", id).header("permissions", user.get("permissions")).header("auth", user.get("auth"))).build();
         return chain.filter(exchange);
     }
 

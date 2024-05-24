@@ -22,7 +22,7 @@ public class TokenUtil {
     //token秘钥
     private static final String TOKEN_SECRET = "fwa4w89GSADF485fawd48gaw54FAW89dwaF8Gad485412354aw";
 
-    public static String accessToken(int permission, Long user) {
+    public static String accessToken(int permission, Long user, String auth) {
         Date date = new Date(System.currentTimeMillis() + ACCESS_EXPIRE_DATE);
         return Jwts.builder()
                 .setId(String.valueOf(user))
@@ -30,6 +30,7 @@ public class TokenUtil {
                 .setExpiration(date)
                 .claim("permission", permission)
                 .claim("user", user)
+                .claim("auth", auth)
                 .signWith(SignatureAlgorithm.HS256, TOKEN_SECRET)
                 .compact();
     }
@@ -53,24 +54,21 @@ public class TokenUtil {
 
             if (claims.get("permission") != null) {
                 data.put("permission", claims.get("permission").toString());
+                data.put("auth", claims.get("auth").toString());
             }
             data.put("user", claims.get("user").toString());
             return data;
         }catch (ExpiredJwtException e){
             data.put("user","-1");
-            data.put("permission", "-1");
             return data;
         } catch (MalformedJwtException e){
             data.put("user","-2");
-            data.put("permission", "-2");
             return data;
         }catch (SignatureException e){
             data.put("user","-3");
-            data.put("permission", "-3");
             return data;
         }catch (UnsupportedJwtException e){
             data.put("user","-4");
-            data.put("permission", "-4");
             return data;
         }
     }
@@ -79,7 +77,7 @@ public class TokenUtil {
         if (user == null) {
             return null;
         } else {
-            return accessToken(user.getPermissions(), user.getId());
+            return accessToken(user.getPermissions(), user.getId(), user.getAuth());
         }
     }
 
@@ -99,5 +97,10 @@ public class TokenUtil {
     public static String verifyUser(String token) {
         Map<String, String> map = verify(token);
         return map.get("user");
+    }
+
+    public static String verifyAuth(String token) {
+        Map<String, String> map = verify(token);
+        return map.get("auth");
     }
 }

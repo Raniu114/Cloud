@@ -28,4 +28,7 @@ public class UserDTO {
     @ApiModelProperty("权限")
     private Integer permissions;
 
+    @ApiModelProperty("权限表")
+    private String auth;
+
 }

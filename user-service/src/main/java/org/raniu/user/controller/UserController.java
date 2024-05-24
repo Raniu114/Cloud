@@ -78,10 +78,12 @@ public class UserController {
         Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
         cookie.setMaxAge(30 * 60);
         cookie.setSecure(true);
+        cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setDomain("zhxy.fjhnkj.com");
         Cookie cookie1 = new Cookie("RefreshToken", this.tokenService.getRefreshToken(userDTO));
         cookie1.setSecure(true);
+        cookie1.setHttpOnly(true);
         cookie1.setMaxAge(30 * 24 * 60 * 60);
         cookie1.setPath("/");
         cookie1.setDomain("zhxy.fjhnkj.com");

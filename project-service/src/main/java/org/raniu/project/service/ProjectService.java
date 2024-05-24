@@ -2,10 +2,9 @@ package org.raniu.project.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.raniu.project.domain.po.ProjectPo;
 
-
-import java.util.List;
 
 /**
  * <p>
@@ -22,7 +21,7 @@ public interface ProjectService extends IService<ProjectPo> {
 
     Page<ProjectPo> select(String key, Integer page, Integer size);
 
-    Page<ProjectPo> select(String key, Long user, Integer page, Integer size);
+    Page<ProjectPo> select(String key, Long user, Integer page, Integer size, Integer permission);
 
-    List<ProjectPo> select(Long user);
+    String selectProject(String key, String page, String size, HttpServletResponse response);
 }

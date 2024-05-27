@@ -3,7 +3,11 @@ package org.raniu.project.controller;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -108,7 +112,8 @@ public class ProjectController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
-    public String deleteProject(@RequestParam(name = "id",value = "项目id") String id, HttpServletResponse response, HttpServletRequest request) {
+    @Parameter(name = "id", description = "项目id")
+    public String deleteProject(@RequestParam(name = "id") String id, HttpServletResponse response, HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         if (id == null) {
             response.setStatus(412);
@@ -139,7 +144,11 @@ public class ProjectController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
-    public String projectList(@RequestParam(name = "page", value = "页码") Integer page, @RequestParam(name = "size",value = "最大条数") Integer size, HttpServletRequest request, HttpServletResponse response) {
+    @Parameters({
+            @Parameter(name = "page", description = "页码"),
+            @Parameter(name = "size", description = "最大条目数")
+    })
+    public String projectList(@RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletRequest request, HttpServletResponse response) {
         JSONObject jsonObject = new JSONObject();
         if (page == null || size == null) {
             response.setStatus(412);
@@ -178,7 +187,8 @@ public class ProjectController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
-    public String getProject(@RequestParam(name = "id", value = "项目id") String id, HttpServletResponse response, HttpServletRequest request) {
+    @Parameter(name = "id", description = "项目id")
+    public String getProject(@RequestParam(name = "id") String id, HttpServletResponse response, HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         if (id == null) {
             response.setStatus(412);
@@ -211,7 +221,12 @@ public class ProjectController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
-    public String selectProject(@RequestParam(name = "key",value = "关键词") String key, @RequestParam(name = "page",value = "页码") String page, @RequestParam(name = "size",value = "最大条数") String size, HttpServletResponse response, HttpServletRequest request) {
+    @Parameters({
+            @Parameter(name = "key", description = "关键词"),
+            @Parameter(name = "page", description = "页码"),
+            @Parameter(name = "size", description = "最大条目数")
+    })
+    public String selectProject(@RequestParam(name = "key") String key, @RequestParam(name = "page") String page, @RequestParam(name = "size") String size, HttpServletResponse response, HttpServletRequest request) {
         return this.projectService.selectProject(key, page, size, response);
     }
 }

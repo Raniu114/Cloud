@@ -71,6 +71,7 @@ public class UserController {
         userDTO.setId(user.getId());
         userDTO.setPermissions(user.getPermissions());
         userDTO.setUsername(user.getUsername());
+        userDTO.setAuth(user.getAuth());
         jsonObject.put("status", 1);
         jsonObject.put("msg", "登陆成功");
         jsonObject.put("user", BeanMap.create(userDTO));
@@ -121,7 +122,7 @@ public class UserController {
         userDTO.setId(user.getId());
         userDTO.setPermissions(user.getPermissions());
         userDTO.setUsername(user.getUsername());
-
+        userDTO.setAuth(user.getAuth());
         jsonObject.put("status", 1);
         jsonObject.put("msg", "登陆成功");
         jsonObject.put("user", BeanMap.create(user));
@@ -156,10 +157,26 @@ public class UserController {
             jsonObject.put("msg", "请提供Token");
             return jsonObject.toString();
         }
-        UserPo user = this.userService.getById(this.tokenService.verifyUser(refreshToken));
+        Long u = this.tokenService.verifyUser(refreshToken);
+        if (u == -1) {
+            response.setStatus(401);
+            jsonObject.put("status", -1);
+            jsonObject.put("msg", "token过期");
+            return jsonObject.toString();
+        } else if (u == -2 || u == -4) {
+            response.setStatus(401);
+            jsonObject.put("status", -2);
+            jsonObject.put("msg", "token错误");
+            return jsonObject.toString();
+        } else if (u == -3) {
+            response.setStatus(401);
+            jsonObject.put("status", -3);
+            jsonObject.put("msg", "token签名错误");
+        }
+        UserPo user = this.userService.getById(u);
         if (user == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
+            jsonObject.put("status", -4);
             jsonObject.put("msg", "用户不存在");
             return jsonObject.toString();
         }
@@ -167,6 +184,7 @@ public class UserController {
         userDTO.setId(user.getId());
         userDTO.setPermissions(user.getPermissions());
         userDTO.setUsername(user.getUsername());
+        userDTO.setAuth(user.getAuth());
         jsonObject.put("status", 1);
         jsonObject.put("msg", "获取成功");
         jsonObject.put("user", BeanMap.create(user));

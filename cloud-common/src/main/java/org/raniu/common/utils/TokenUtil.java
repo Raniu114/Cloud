@@ -49,7 +49,6 @@ public class TokenUtil {
     public static Map<String,String> verify(String token) {
         Map<String,String> data = new HashMap<>();
         try {
-            System.out.println(token);
             Claims claims = Jwts.parser().setSigningKey(TOKEN_SECRET).parseClaimsJws(token).getBody();
 
             if (claims.get("permission") != null) {

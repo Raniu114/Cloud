@@ -3,10 +3,12 @@ package org.raniu.user.domain.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.sql.Date;
 
 /**
  * <p>
@@ -32,5 +34,15 @@ import java.io.Serializable;
 
     private Integer permissions;
 
+    private String auth;
 
+    private String email;
+
+    private String phone;
+
+    private String creatUser;
+
+    private Long creatTime;
+
+    private String addr;
 }

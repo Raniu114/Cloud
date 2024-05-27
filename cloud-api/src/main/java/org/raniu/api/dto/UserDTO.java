@@ -31,4 +31,19 @@ public class UserDTO {
     @ApiModelProperty("权限表")
     private String auth;
 
+    @ApiModelProperty("邮箱")
+    private String email;
+
+    @ApiModelProperty("联系电话")
+    private String phone;
+
+    @ApiModelProperty("创建用户")
+    private String creatUser;
+
+    @ApiModelProperty("创建时间")
+    private Long creatTime;
+
+    @ApiModelProperty("地址")
+    private String addr;
+
 }

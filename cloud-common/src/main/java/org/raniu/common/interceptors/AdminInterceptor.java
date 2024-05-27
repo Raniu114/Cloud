@@ -19,7 +19,6 @@ import jakarta.servlet.http.HttpServletResponse;
  * @version: 1.0
  */
 
-@Component
 public class AdminInterceptor implements HandlerInterceptor {
 
     @Override

@@ -2,6 +2,7 @@ package org.raniu.common.configuration;
 
 import org.raniu.common.interceptors.AdminInterceptor;
 import org.raniu.common.interceptors.UserInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -28,7 +29,10 @@ public class MvcConfiguration implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns("/**/login/**"
                         ,"/**/token"
+                        ,"/doc.html/**"
                         ,"/RSA/**"
+                        ,"/favicon.ico"
+                        ,"/error"
                         ,"/swagger-ui/**"
                         ,"/swagger-resources/**"
                         ,"/webjars/**"
@@ -39,8 +43,11 @@ public class MvcConfiguration implements WebMvcConfigurer {
                 .addPathPatterns("/**/add","/**/delete","/**/update","/user/list","/user/select")
                 .excludePathPatterns(
                         "/strategy/**"
+                        ,"/doc.html/**"
                         ,"/swagger-resources/**"
                         ,"/swagger-ui/**"
+                        ,"/favicon.ico"
+                        ,"/error"
                         ,"/webjars/**"
                         ,"/v3/**"
                         ,"/api/**"

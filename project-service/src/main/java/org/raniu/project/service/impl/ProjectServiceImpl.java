@@ -67,6 +67,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, ProjectPo> im
     @Override
     public String selectProject(String key, String page, String size, HttpServletResponse response) {
         JSONObject jsonObject = new JSONObject();
+        System.out.println(Thread.currentThread().getName());
         if (key == null) {
             response.setStatus(412);
             jsonObject.put("status", -1);

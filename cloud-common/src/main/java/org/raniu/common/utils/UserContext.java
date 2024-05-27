@@ -1,6 +1,7 @@
 package org.raniu.common.utils;
 
 import lombok.Data;
+import org.springframework.stereotype.Component;
 
 /**
  * @projectName: IOTCloud
@@ -11,6 +12,7 @@ import lombok.Data;
  * @date: 2024/4/26 10:42
  * @version: 1.0
  */
+
 public class UserContext {
     private static final ThreadLocal<tv> threadLocal = new ThreadLocal<>();
 
@@ -31,6 +33,7 @@ public class UserContext {
         t.setUser(user);
         t.setPermissions(permissions);
         t.setAuth(auth);
+        System.out.println(t.toString());
         threadLocal.set(t);
     }
 

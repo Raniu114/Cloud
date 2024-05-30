@@ -15,7 +15,7 @@ import lombok.Data;
  * @version: 1.0
  */
 @Data
-@ApiModel(value = "用户参数",description = "用户参数")
+@ApiModel(value = "用户登录参数",description = "用户登录参数")
 public class UserLoginVo {
     @NotNull(message = "用户名不能为空")
     @ApiModelProperty(value = "用户名",name = "username",required = true)

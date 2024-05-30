@@ -40,7 +40,7 @@ import java.sql.Date;
 
     private String phone;
 
-    private String creatUser;
+    private Long creatUser;
 
     private Long creatTime;
 

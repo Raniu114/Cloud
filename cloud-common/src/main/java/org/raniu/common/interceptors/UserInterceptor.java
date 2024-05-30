@@ -21,7 +21,6 @@ public class UserInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        System.out.println(request.getRequestURI());
         UserContext.setUser(Long.parseLong(request.getHeader("user")), request.getIntHeader("permissions"), request.getHeader("auth"));
         return true;
     }

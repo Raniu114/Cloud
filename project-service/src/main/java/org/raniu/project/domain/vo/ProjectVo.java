@@ -2,6 +2,7 @@ package org.raniu.project.domain.vo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -17,16 +18,19 @@ import lombok.Data;
  * @version: 1.0
  */
 @Data
-@ApiModel(value = "项目请求参数", description = "项目请求参数")
+@Schema(title = "项目请求参数", description = "项目请求参数")
 public class ProjectVo {
-    @ApiModelProperty(value = "项目id",name = "id",required = true)
+    @Schema(description = "项目id",name = "id",required = true)
     @NotNull(message = "项目id不能为空")
     private String id;
 
-    @ApiModelProperty(value = "项目名称",name = "name", required = true)
+    @Schema(description = "项目名称",name = "name", required = true)
     @NotNull(message = "项目名称不能为空")
     private String name;
 
-    @ApiModelProperty(value = "所有者", name = "owner",required = false)
+    @Schema(description = "所有者", name = "owner",required = false)
     private Long owner;
+
+    @Schema(description = "项目地址", name = "addr", required = false)
+    private String addr;
 }

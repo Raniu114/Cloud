@@ -1,10 +1,5 @@
 package org.raniu.project.controller;
 
-
-import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -13,16 +8,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.json.JSONObject;
 
-import org.raniu.common.utils.UserContext;
-import org.raniu.project.domain.po.ProjectPo;
 import org.raniu.project.domain.vo.ProjectVo;
 import org.raniu.project.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.beans.BeanMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -48,31 +37,8 @@ public class ProjectController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
-    public String addProject(@RequestBody @Valid ProjectVo projectVo, BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) {
-        for (ObjectError error : bindingResult.getAllErrors()) {
-            return error.getDefaultMessage();
-        }
-        JSONObject jsonObject = new JSONObject();
-        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
-        if ("write".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
-            response.setStatus(403);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "权限不足");
-            return jsonObject.toString();
-        }
-        ProjectPo projectPo = new ProjectPo();
-        projectPo.setId(projectVo.getId());
-        projectPo.setName(projectVo.getName());
-        projectPo.setOwner(projectVo.getOwner());
-        if (!this.projectService.save(projectPo)) {
-            response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "添加失败，请检查id是否重复");
-            return jsonObject.toString();
-        }
-        jsonObject.put("status", 1);
-        jsonObject.put("msg", "添加成功");
-        return jsonObject.toString();
+    public String addProject(@RequestBody @Valid ProjectVo projectVo, HttpServletRequest request, HttpServletResponse response) {
+        return this.projectService.addProject(projectVo, response);
     }
 
     @PostMapping("/update")
@@ -80,31 +46,8 @@ public class ProjectController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
-    public String updateProject(@RequestBody @Valid ProjectVo projectVo, BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) {
-        for (ObjectError error : bindingResult.getAllErrors()) {
-            return error.getDefaultMessage();
-        }
-        JSONObject jsonObject = new JSONObject();
-        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
-        if ("write".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
-            response.setStatus(403);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "权限不足");
-            return jsonObject.toString();
-        }
-        ProjectPo projectPo = new ProjectPo();
-        projectPo.setOwner(projectVo.getOwner());
-        projectPo.setName(projectVo.getName());
-        projectPo.setId(projectVo.getId());
-        if (this.projectService.updateById(projectPo)) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "更新成功");
-        } else {
-            response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "更新失败");
-        }
-        return jsonObject.toString();
+    public String updateProject(@RequestBody @Valid ProjectVo projectVo, HttpServletRequest request, HttpServletResponse response) {
+        return this.projectService.updateProject(projectVo, response);
     }
 
     @PostMapping("/delete")
@@ -114,29 +57,7 @@ public class ProjectController {
     @ApiResponse(responseCode = "412", description = "id可能重复")
     @Parameter(name = "id", description = "项目id")
     public String deleteProject(@RequestParam(name = "id") String id, HttpServletResponse response, HttpServletRequest request) {
-        JSONObject jsonObject = new JSONObject();
-        if (id == null) {
-            response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
-        }
-        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
-        if ("write".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
-            response.setStatus(403);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "权限不足");
-            return jsonObject.toString();
-        }
-        if (this.projectService.removeById(id)) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "删除成功");
-        } else {
-            response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "未找到项目");
-        }
-        return jsonObject.toString();
+        return this.projectService.deleteProject(id, response);
     }
 
     @GetMapping("/list")
@@ -149,37 +70,7 @@ public class ProjectController {
             @Parameter(name = "size", description = "最大条目数")
     })
     public String projectList(@RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletRequest request, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
-        if (page == null || size == null) {
-            response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
-        }
-        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
-        if ("none".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
-            response.setStatus(403);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "权限不足");
-            return jsonObject.toString();
-        }
-        Page<ProjectPo> projects;
-        if (UserContext.getPermissions() > 1) {
-            projects = this.projectService.list(page, size);
-        } else {
-            projects = this.projectService.list(page, size, UserContext.getUser());
-        }
-        if (!projects.getRecords().isEmpty()) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "获取成功");
-            jsonObject.put("projects", projects.getRecords());
-            jsonObject.put("pages", projects.getPages());
-        } else {
-            response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "获取失败");
-        }
-        return jsonObject.toString();
+        return this.projectService.listProject(page, size, response);
     }
 
     @GetMapping("/get")
@@ -189,31 +80,7 @@ public class ProjectController {
     @ApiResponse(responseCode = "412", description = "id可能重复")
     @Parameter(name = "id", description = "项目id")
     public String getProject(@RequestParam(name = "id") String id, HttpServletResponse response, HttpServletRequest request) {
-        JSONObject jsonObject = new JSONObject();
-        if (id == null) {
-            response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
-        }
-        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
-        if ("none".equals(authJson.get("project")) && UserContext.getPermissions() < 2) {
-            response.setStatus(403);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "权限不足");
-            return jsonObject.toString();
-        }
-        ProjectPo projectPo = this.projectService.getById(id);
-        if (projectPo == null) {
-            response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "未查询到项目");
-            return jsonObject.toString();
-        }
-        jsonObject.put("status", 1);
-        jsonObject.put("msg", "获取成功");
-        jsonObject.put("project", BeanMap.create(projectPo));
-        return jsonObject.toString();
+        return this.projectService.getProject(id, response);
     }
 
     @GetMapping("/select")
@@ -221,12 +88,13 @@ public class ProjectController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
+    @ApiResponse(responseCode = "200", description = "OK")
     @Parameters({
             @Parameter(name = "key", description = "关键词"),
             @Parameter(name = "page", description = "页码"),
             @Parameter(name = "size", description = "最大条目数")
     })
-    public String selectProject(@RequestParam(name = "key") String key, @RequestParam(name = "page") String page, @RequestParam(name = "size") String size, HttpServletResponse response, HttpServletRequest request) {
+    public String selectProject(@RequestParam(name = "key") String key, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
         return this.projectService.selectProject(key, page, size, response);
     }
 }

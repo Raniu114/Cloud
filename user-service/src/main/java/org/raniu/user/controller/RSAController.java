@@ -1,8 +1,8 @@
 package org.raniu.user.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.raniu.user.service.RSAService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @CrossOrigin
 @RequestMapping("/RSA")
-@Api(tags = "RSA接口",value = "RSA接口")
+@Tag(name = "RSA接口",description = "RSA接口")
 public class RSAController {
     @Autowired
     private RSAService rsaService;
 
     @GetMapping("/get")
-    @ApiOperation(notes = "获取RSA公钥",value = "获取公钥")
+    @Operation(summary = "获取RSA公钥",description = "获取公钥")
     public String get(){
         return rsaService.getPublicKey();
     }

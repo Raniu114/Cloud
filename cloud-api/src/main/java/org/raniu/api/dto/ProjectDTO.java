@@ -26,5 +26,12 @@ public class ProjectDTO {
     @ApiModelProperty("项目所有人")
     private Long owner;
 
+    @ApiModelProperty("项目创建人")
+    private String creatUser;
 
+    @ApiModelProperty("项目地址")
+    private String addr;
+
+    @ApiModelProperty("项目创建时间")
+    private Long creatTime;
 }

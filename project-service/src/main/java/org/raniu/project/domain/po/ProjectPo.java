@@ -29,5 +29,10 @@ import java.io.Serializable;
 
     private Long owner;
 
+    private String creatUser;
+
+    private Long creatTime;
+
+    private String addr;
 
 }

@@ -33,7 +33,7 @@ public interface UserService extends IService<UserPo> {
 
     String userList(Integer page,Integer size,HttpServletResponse response);
 
-    String delUser(Integer id,HttpServletResponse response);
+    String delUser(Long id,HttpServletResponse response);
 
     String updateUser(UserVo userVo, HttpServletResponse response);
 

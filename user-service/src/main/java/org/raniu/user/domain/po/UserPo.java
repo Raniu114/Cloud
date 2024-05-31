@@ -1,32 +1,34 @@
 package org.raniu.user.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.annotations.ApiModelProperty;
+import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.sql.Date;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author raniu
  * @since 2023-12-11
  */
 @Data
-  @EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = false)
 @TableName("user")
-    public class UserPo implements Serializable {
+public class UserPo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-      @TableId(value = "id", type = IdType.AUTO)
-      private Long id;
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
     private String username;
 

@@ -20,23 +20,21 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if ("OPTIONS".equals(request.getMethod())) {
+        String[] uri = request.getRequestURI().split("/");
+        cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
+        if ("POST".equals(request.getMethod())) {
+            if ((int) authJson.get(uri[1]) < AuthEnum.READ_WRITE.ordinal()) {
+                JSONObject jsonObject = new JSONObject();
+                response.setStatus(403);
+                jsonObject.put("status", -1);
+                jsonObject.put("msg", "权限不足");
+                response.getWriter().write(jsonObject.toString());
+                return false;
+            }
             return true;
         }
-        if ("POST".equals(request.getMethod())) {
-            cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
-            if ((int) authJson.get(request.getContextPath()) < AuthEnum.READ_WRITE.ordinal()) {
-                JSONObject jsonObject = new JSONObject();
-                response.setStatus(403);
-                jsonObject.put("status", -1);
-                jsonObject.put("msg", "权限不足");
-                response.getWriter().write(jsonObject.toString());
-                return false;
-            }
-        }
         if ("GET".equals(request.getMethod())) {
-            cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
-            if ((int) authJson.get(request.getContextPath()) == AuthEnum.NONE.ordinal()) {
+            if ((int) authJson.get(uri[1]) == AuthEnum.NONE.ordinal()) {
                 JSONObject jsonObject = new JSONObject();
                 response.setStatus(403);
                 jsonObject.put("status", -1);
@@ -44,7 +42,8 @@ public class AuthInterceptor implements HandlerInterceptor {
                 response.getWriter().write(jsonObject.toString());
                 return false;
             }
+            return true;
         }
-        return true;
+        return false;
     }
 }

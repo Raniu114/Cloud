@@ -3,7 +3,7 @@ package org.raniu.api.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
+import cn.hutool.json.JSONObject;
 /**
  * <p>
  *
@@ -29,7 +29,7 @@ public class UserDTO {
     private Integer permissions;
 
     @ApiModelProperty("权限表")
-    private String auth;
+    private JSONObject auth;
 
     @ApiModelProperty("邮箱")
     private String email;
@@ -38,7 +38,7 @@ public class UserDTO {
     private String phone;
 
     @ApiModelProperty("创建用户")
-    private String creatUser;
+    private Long creatUser;
 
     @ApiModelProperty("创建时间")
     private Long creatTime;

@@ -86,7 +86,7 @@ public class ProjectController {
     @GetMapping("/select")
     @Operation(summary = "查询项目", description = "查询项目,可以提供名称关键词、所有者关键词进行查询")
     @ApiResponse(responseCode = "401", description = "未携带token")
-    @ApiResponse(responseCode = "403", description = "权限不足")
+    @ApiResponse(responseCode = "403", description = "权限不足")    
     @ApiResponse(responseCode = "412", description = "id可能重复")
     @ApiResponse(responseCode = "200", description = "OK")
     @Parameters({

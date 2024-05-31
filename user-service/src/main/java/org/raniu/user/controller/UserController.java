@@ -97,7 +97,7 @@ public class UserController {
             @Parameter(name = "page", description = "分页页码", required = true),
             @Parameter(name = "size", description = "单页长度", required = true)
     })
-    public String userList(@RequestParam Integer page, @RequestParam Integer size, HttpServletRequest request, HttpServletResponse response) {
+    public String userList(@RequestParam("page") Integer page, @RequestParam("size") Integer size, HttpServletRequest request, HttpServletResponse response) {
         return this.userService.userList(page, size, response);
     }
 
@@ -108,7 +108,8 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "权限不足"),
             @ApiResponse(responseCode = "412", description = "参数缺失或找不到用户")
     })
-    public String deleteUser(@RequestParam Integer id, HttpServletResponse response, HttpServletRequest request) {
+    @Parameter(name = "id", description = "用户id")
+    public String deleteUser(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.delUser(id, response);
     }
 
@@ -134,7 +135,8 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "权限与操作不符"),
             @ApiResponse(responseCode = "412", description = "参数缺失或找不到用户")
     })
-    public String getUser(@RequestParam Long id, HttpServletResponse response, HttpServletRequest request) {
+    @Parameter(name = "id", description = "用户id")
+    public String getUser(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.getUser(id, response);
     }
 
@@ -145,7 +147,12 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "权限不足"),
             @ApiResponse(responseCode = "412", description = "参数缺失或找不到用户")
     })
-    public String selectUser(@RequestParam String key, @RequestParam Integer page, @RequestParam Integer size, HttpServletResponse response, HttpServletRequest request) {
+    @Parameters({
+            @Parameter(name = "key", description = "关键词"),
+            @Parameter(name = "page", description = "页码"),
+            @Parameter(name = "size", description = "最大条目数")
+    })
+    public String selectUser(@RequestParam(name = "key") String key, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.selectUser(key, page, size, response);
     }
 

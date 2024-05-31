@@ -76,7 +76,7 @@ public class TokenUtil {
         if (user == null) {
             return null;
         } else {
-            return accessToken(user.getPermissions(), user.getId(), user.getAuth());
+            return accessToken(user.getPermissions(), user.getId(), user.getAuth().toString());
         }
     }
 

@@ -1,5 +1,7 @@
 package org.raniu.user.service.impl;
 
+import cn.hutool.Hutool;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -43,9 +45,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
     public UserPo login(UserLoginVo userLoginVo, Integer permission) {
         QueryWrapper<UserPo> queryWrapper = new QueryWrapper<UserPo>();
         if (permission == 1) {
-            queryWrapper.eq("username", userLoginVo.getUsername()).eq("password", userLoginVo.getPassword()).ge("permission", 1);
+            queryWrapper.eq("username", userLoginVo.getUsername()).eq("password", userLoginVo.getPassword()).ge("permissions", 1);
         } else {
-            queryWrapper.eq("username", userLoginVo.getUsername()).eq("password", userLoginVo.getPassword()).lt("permission", 1);
+            queryWrapper.eq("username", userLoginVo.getUsername()).eq("password", userLoginVo.getPassword()).lt("permissions", 1);
         }
         return this.userMapper.selectOne(queryWrapper);
     }
@@ -78,7 +80,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
             return jsonObject.toString();
         }
         UserPo user = login(userLoginVo, 1);
-        if (user == null || user.getPermissions() != 1) {
+        if (user == null) {
             response.setStatus(412);
             jsonObject.put("status", -1);
             jsonObject.put("msg", "用户不存在");
@@ -87,7 +89,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         userDTO.setId(user.getId());
         userDTO.setPermissions(user.getPermissions());
         userDTO.setUsername(user.getUsername());
-        userDTO.setAuth(user.getAuth());
+        userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
         jsonObject.put("status", 1);
         jsonObject.put("msg", "登陆成功");
         jsonObject.put("user", BeanMap.create(userDTO));
@@ -121,7 +123,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
             return jsonObject.toString();
         }
         UserPo user = login(userLoginVo, 0);
-        if (user == null || user.getPermissions() != 1) {
+        if (user == null) {
             response.setStatus(412);
             jsonObject.put("status", -1);
             jsonObject.put("msg", "用户不存在");
@@ -130,7 +132,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         userDTO.setId(user.getId());
         userDTO.setPermissions(user.getPermissions());
         userDTO.setUsername(user.getUsername());
-        userDTO.setAuth(user.getAuth());
+        userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
         jsonObject.put("status", 1);
         jsonObject.put("msg", "登陆成功");
         jsonObject.put("user", BeanMap.create(user));
@@ -187,7 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         userDTO.setId(user.getId());
         userDTO.setPermissions(user.getPermissions());
         userDTO.setUsername(user.getUsername());
-        userDTO.setAuth(user.getAuth());
+        userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
         jsonObject.put("status", 1);
         jsonObject.put("msg", "获取成功");
         jsonObject.put("user", BeanMap.create(user));
@@ -256,7 +258,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
     }
 
     @Override
-    public String delUser(Integer id, HttpServletResponse response) {
+    public String delUser(Long id, HttpServletResponse response) {
         JSONObject jsonObject = new JSONObject();
         if (id == null) {
             response.setStatus(412);
@@ -289,7 +291,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         UserPo user = new UserPo();
         user.setPassword(userVo.getPassword());
         user.setUsername(userVo.getUsername());
-        user.setId(user.getId());
+        user.setId(userVo.getId());
         user.setEmail(userVo.getEmail());
         user.setPhone(userVo.getPhone());
         user.setAuth(userVo.getAuth());
@@ -323,15 +325,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
             jsonObject.put("msg", "未查询到用户");
             return jsonObject.toString();
         }
-        if (!user.getId().equals(UserContext.getUser()) && UserContext.getPermissions() < 2) {
-            response.setStatus(403);
-            jsonObject.put("status", 0);
-            jsonObject.put("msg", "权限不足");
-            return jsonObject.toString();
-        }
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setPassword(user.getPassword());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
+        userDTO.setAddr(user.getAddr());
+        userDTO.setPermissions(user.getPermissions());
+        userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
+        userDTO.setCreatTime(user.getCreatTime());
+        userDTO.setCreatUser(user.getCreatUser());
         jsonObject.put("status", 1);
         jsonObject.put("msg", "获取成功");
-        jsonObject.put("user", BeanMap.create(user));
+        jsonObject.put("user", BeanMap.create(userDTO));
         return jsonObject.toString();
     }
 

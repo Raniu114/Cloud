@@ -176,7 +176,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, ProjectPo> im
         projectPo.setName(projectVo.getName());
         projectPo.setOwner(projectVo.getOwner());
         projectPo.setAddr(projectVo.getAddr());
-        projectPo.setOwner(UserContext.getUser());
+        projectPo.setCreatUser(UserContext.getUser());
         projectPo.setCreatTime(System.currentTimeMillis());
         if (!save(projectPo)) {
             response.setStatus(412);

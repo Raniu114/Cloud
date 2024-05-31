@@ -33,7 +33,6 @@ public class UserContext {
         t.setUser(user);
         t.setPermissions(permissions);
         t.setAuth(auth);
-        System.out.println(t.toString());
         threadLocal.set(t);
     }
 

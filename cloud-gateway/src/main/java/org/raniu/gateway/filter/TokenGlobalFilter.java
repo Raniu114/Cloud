@@ -77,7 +77,7 @@ public class TokenGlobalFilter implements GlobalFilter, Ordered {
             return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
         }
         exchange.mutate()
-                .request(builder -> builder.header("user", id).header("permissions", user.get("permissions")).header("auth", user.get("auth"))).build();
+                .request(builder -> builder.header("user", id).header("permission", user.get("permission")).header("auth", user.get("auth"))).build();
         return chain.filter(exchange);
     }
 

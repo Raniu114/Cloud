@@ -10,6 +10,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.raniu.api.dto.UserDTO;
+import org.raniu.api.enums.ResultCode;
+import org.raniu.api.vo.Result;
 import org.raniu.common.utils.UserContext;
 import org.raniu.user.domain.po.UserPo;
 import org.raniu.user.domain.vo.UserLoginVo;
@@ -21,6 +23,8 @@ import org.raniu.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -69,30 +73,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
     }
 
     @Override
-    public String loginAdmin(UserLoginVo userLoginVo, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<UserDTO> loginAdmin(UserLoginVo userLoginVo, HttpServletResponse response) {
         try {
             userLoginVo.setPassword(this.rsaService.decrypt(userLoginVo.getPassword()));
         } catch (Exception e) {
             response.setStatus(400);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "请验证密钥是否正确");
-            return jsonObject.toString();
+            return Result.error(ResultCode.ERROR_PARAMETERS, "请验证密钥是否正确");
         }
         UserPo user = login(userLoginVo, 1);
         if (user == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "用户不存在");
+            return Result.error(ResultCode.ERROR_PARAMETERS, "用户不存在");
         }
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
         userDTO.setPermissions(user.getPermissions());
         userDTO.setUsername(user.getUsername());
         userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
-        jsonObject.put("status", 1);
-        jsonObject.put("msg", "登陆成功");
-        jsonObject.put("user", BeanMap.create(userDTO));
         response.setStatus(200);
         Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
         cookie.setMaxAge(30 * 60);
@@ -108,34 +105,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         cookie1.setDomain("zhxy.fjhnkj.com");
         response.addCookie(cookie);
         response.addCookie(cookie1);
-        return jsonObject.toString();
+        return Result.success("登陆成功", userDTO);
     }
 
     @Override
-    public String loginUser(UserLoginVo userLoginVo, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<UserDTO> loginUser(UserLoginVo userLoginVo, HttpServletResponse response) {
         try {
             userLoginVo.setPassword(this.rsaService.decrypt(userLoginVo.getPassword()));
         } catch (Exception e) {
             response.setStatus(400);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "请验证密钥是否正确");
-            return jsonObject.toString();
+            return Result.error(ResultCode.ERROR_PARAMETERS, "请验证密钥是否正确");
         }
         UserPo user = login(userLoginVo, 0);
         if (user == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "用户不存在");
+            return Result.error(ResultCode.ERROR_PARAMETERS, "用户不存在");
         }
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
         userDTO.setPermissions(user.getPermissions());
         userDTO.setUsername(user.getUsername());
         userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
-        jsonObject.put("status", 1);
-        jsonObject.put("msg", "登陆成功");
-        jsonObject.put("user", BeanMap.create(user));
+        response.setStatus(200);
         Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
         cookie.setMaxAge(30 * 60);
         cookie.setSecure(true);
@@ -150,49 +141,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         cookie1.setDomain("zhxy.fjhnkj.com");
         response.addCookie(cookie);
         response.addCookie(cookie1);
-        return jsonObject.toString();
+        return Result.success("登陆成功", userDTO);
     }
 
     @Override
-    public String getToken(String refreshToken, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
-        if (refreshToken.isEmpty()) {
+    public Result<UserDTO> getToken(String refreshToken, HttpServletResponse response) {
+        if (refreshToken == null) {
             response.setStatus(401);
-            jsonObject.put("status", 0);
-            jsonObject.put("msg", "请提供Token");
-            return jsonObject.toString();
+            return Result.error(ResultCode.MISSING, "请提供Token");
         }
         Long u = this.tokenService.verifyUser(refreshToken);
         if (u == -1) {
             response.setStatus(401);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "token过期");
-            return jsonObject.toString();
-        } else if (u == -2 || u == -4) {
+            return Result.error(ResultCode.TOKEN_TIMEOUT, "token过期");
+        } else if (u == -2 || u == -3 || u == -4) {
             response.setStatus(401);
-            jsonObject.put("status", -2);
-            jsonObject.put("msg", "token错误");
-            return jsonObject.toString();
-        } else if (u == -3) {
-            response.setStatus(401);
-            jsonObject.put("status", -3);
-            jsonObject.put("msg", "token签名错误");
+            return Result.error(ResultCode.TOKEN_ERROR, "token错误");
         }
         UserPo user = getById(u);
         if (user == null) {
             response.setStatus(412);
-            jsonObject.put("status", -4);
-            jsonObject.put("msg", "用户不存在");
-            return jsonObject.toString();
+            return Result.error(ResultCode.ERROR_PARAMETERS, "用户不存在");
         }
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
         userDTO.setPermissions(user.getPermissions());
         userDTO.setUsername(user.getUsername());
         userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
-        jsonObject.put("status", 1);
-        jsonObject.put("msg", "获取成功");
-        jsonObject.put("user", BeanMap.create(user));
         Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
         cookie.setMaxAge(30 * 60);
         cookie.setHttpOnly(true);
@@ -200,19 +175,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         cookie.setSecure(true);
         cookie.setDomain("zhxy.fjhnkj.com");
         response.addCookie(cookie);
-        return jsonObject.toString();
+        return Result.success("登陆成功", userDTO);
     }
 
     @Override
-    public String addUser(UserVo userVo, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<UserVo> addUser(UserVo userVo, HttpServletResponse response) {
         try {
             userVo.setPassword(this.rsaService.decrypt(userVo.getPassword()));
         } catch (Exception e) {
             response.setStatus(400);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "请验证密钥是否正确");
-            return jsonObject.toString();
+            return Result.error(ResultCode.ERROR_PARAMETERS, "请验证密钥是否正确");
         }
         UserPo user = new UserPo();
         user.setPassword(userVo.getPassword());
@@ -224,69 +196,49 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         user.setPhone(userVo.getPhone());
         user.setCreatTime(System.currentTimeMillis());
         if (save(user)) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "添加成功");
+            return Result.success("添加成功");
         } else {
             response.setStatus(500);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "添加失败");
+            return Result.error(ResultCode.ERROR_PARAMETERS,"添加失败");
         }
-        return jsonObject.toString();
     }
 
     @Override
-    public String userList(Integer page, Integer size, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<List<UserPo>> userList(Integer page, Integer size, HttpServletResponse response) {
         if (page == null || size == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
+            return Result.error(ResultCode.MISSING,"参数不可为空");
         }
         Page<UserPo> users = list(page, size);
         if (!users.getRecords().isEmpty()) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "获取成功");
-            jsonObject.put("users", users.getRecords());
-            jsonObject.put("pages", users.getPages());
+            return Result.success(users.getRecords(),users.getPages());
         } else {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "获取失败");
+            return Result.error(ResultCode.ERROR_PARAMETERS, "获取失败");
         }
-        return jsonObject.toString();
     }
 
     @Override
-    public String delUser(Long id, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<UserVo> delUser(Long id, HttpServletResponse response) {
         if (id == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
+            return Result.error(ResultCode.MISSING,"参数不可为空");
         }
         if (removeById(id)) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "删除成功");
+            return Result.success("删除成功");
         } else {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "未找到用户");
+            return Result.error(ResultCode.ERROR_PARAMETERS, "未找到用户");
         }
-        return jsonObject.toString();
     }
 
     @Override
-    public String updateUser( UserVo userVo, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<UserVo> updateUser(UserVo userVo, HttpServletResponse response) {
         try {
             userVo.setPassword(this.rsaService.decrypt(userVo.getPassword()));
         } catch (Exception e) {
             response.setStatus(400);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "请验证密钥是否正确");
-            return jsonObject.toString();
+            return Result.error(ResultCode.ERROR_PARAMETERS, "请验证密钥是否正确");
         }
         UserPo user = new UserPo();
         user.setPassword(userVo.getPassword());
@@ -298,65 +250,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         user.setAddr(userVo.getAddr());
         user.setPermissions(userVo.getPermissions());
         if (updateById(user)) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "更新成功");
+            return Result.success("更新成功");
         } else {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "更新失败");
+            return Result.error(ResultCode.ERROR_PARAMETERS, "更新失败");
         }
-        return jsonObject.toString();
     }
 
     @Override
-    public String getUser(Long id, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<UserPo> getUser(Long id, HttpServletResponse response) {
         if (id == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
+            return Result.error(ResultCode.MISSING,"参数不可为空");
         }
 
         UserPo user = getById(id);
         if (user == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "未查询到用户");
-            return jsonObject.toString();
+            return Result.error(ResultCode.ERROR_PARAMETERS, "未找到用户");
         }
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setPassword(user.getPassword());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setPhone(user.getPhone());
-        userDTO.setAddr(user.getAddr());
-        userDTO.setPermissions(user.getPermissions());
-        userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
-        userDTO.setCreatTime(user.getCreatTime());
-        userDTO.setCreatUser(user.getCreatUser());
-        jsonObject.put("status", 1);
-        jsonObject.put("msg", "获取成功");
-        jsonObject.put("user", BeanMap.create(userDTO));
-        return jsonObject.toString();
+        return Result.success(user);
     }
 
     @Override
-    public String selectUser(String key, Integer page, Integer size, HttpServletResponse response) {
+    public Result<List<UserPo>> selectUser(String key, Integer page, Integer size, HttpServletResponse response) {
         JSONObject jsonObject = new JSONObject();
         if (key == null || page == null || size == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
+            return Result.error(ResultCode.MISSING,"参数不可为空");
         }
         Page<UserPo> users = select(key, page, size);
-        jsonObject.put("status", 1);
-        jsonObject.put("msg", "获取成功");
-        jsonObject.put("users", users.getRecords());
-        jsonObject.put("pages", users.getPages());
-        return jsonObject.toString();
+        return Result.success(users.getRecords(),users.getPages());
     }
 
 }

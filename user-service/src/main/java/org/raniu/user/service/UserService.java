@@ -3,9 +3,13 @@ package org.raniu.user.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.raniu.api.dto.UserDTO;
+import org.raniu.api.vo.Result;
 import org.raniu.user.domain.po.UserPo;
 import org.raniu.user.domain.vo.UserLoginVo;
 import org.raniu.user.domain.vo.UserVo;
+
+import java.util.List;
 
 
 /**
@@ -23,21 +27,21 @@ public interface UserService extends IService<UserPo> {
 
     Page<UserPo> select(String key, Integer page, Integer size);
 
-    String loginAdmin(UserLoginVo userLoginVo, HttpServletResponse response);
+    Result<UserDTO> loginAdmin(UserLoginVo userLoginVo, HttpServletResponse response);
 
-    String loginUser(UserLoginVo userLoginVo, HttpServletResponse response);
+    Result<UserDTO> loginUser(UserLoginVo userLoginVo, HttpServletResponse response);
 
-    String getToken(String refreshToken, HttpServletResponse response);
+    Result<UserDTO> getToken(String refreshToken, HttpServletResponse response);
 
-    String addUser(UserVo userVo, HttpServletResponse response);
+    Result<UserVo> addUser(UserVo userVo, HttpServletResponse response);
 
-    String userList(Integer page,Integer size,HttpServletResponse response);
+    Result<List<UserPo>> userList(Integer page, Integer size, HttpServletResponse response);
 
-    String delUser(Long id,HttpServletResponse response);
+    Result<UserVo> delUser(Long id,HttpServletResponse response);
 
-    String updateUser(UserVo userVo, HttpServletResponse response);
+    Result<UserVo> updateUser(UserVo userVo, HttpServletResponse response);
 
-    String getUser(Long id, HttpServletResponse response);
+    Result<UserPo> getUser(Long id, HttpServletResponse response);
 
-    String selectUser(String key, Integer page, Integer size, HttpServletResponse response);
+    Result<List<UserPo>> selectUser(String key, Integer page, Integer size, HttpServletResponse response);
 }

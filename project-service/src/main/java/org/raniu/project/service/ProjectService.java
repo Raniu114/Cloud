@@ -1,10 +1,13 @@
 package org.raniu.project.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.raniu.api.vo.Result;
 import org.raniu.project.domain.po.ProjectPo;
 import org.raniu.project.domain.vo.ProjectVo;
+
+import java.util.List;
 
 
 /**
@@ -17,20 +20,20 @@ import org.raniu.project.domain.vo.ProjectVo;
  */
 public interface ProjectService extends IService<ProjectPo> {
 
-    Page<ProjectPo> list(Integer page, Integer size, Long userId, Integer permission);
+    IPage<ProjectVo> list(Integer page, Integer size, Long userId, Integer permission);
 
-    Page<ProjectPo> select(String key, Long user, Integer page, Integer size, Integer permission);
+    IPage<ProjectVo> select(String key, Long user, Integer page, Integer size, Integer permission);
 
-    String selectProject(String key, Integer page, Integer size, HttpServletResponse response);
+    Result<List<ProjectVo>> selectProject(String key, Integer page, Integer size, HttpServletResponse response);
 
-    String getProject(String id, HttpServletResponse response);
+    Result<ProjectVo> getProject(String id, HttpServletResponse response);
 
-    String listProject(Integer page, Integer size, HttpServletResponse response);
+    Result<List<ProjectVo>> listProject(Integer page, Integer size, HttpServletResponse response);
 
-    String deleteProject(String id, HttpServletResponse response);
+    Result<ProjectPo> deleteProject(String id, HttpServletResponse response);
 
-    String updateProject(ProjectVo projectVo, HttpServletResponse response);
+    Result<ProjectPo> updateProject(ProjectVo projectVo, HttpServletResponse response);
 
-    String addProject(ProjectVo projectVo, HttpServletResponse response);
+    Result<ProjectPo> addProject(ProjectVo projectVo, HttpServletResponse response);
 
 }

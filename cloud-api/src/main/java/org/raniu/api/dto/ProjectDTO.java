@@ -34,4 +34,7 @@ public class ProjectDTO {
 
     @ApiModelProperty("项目创建时间")
     private Long creatTime;
+
+    @ApiModelProperty("项目类型")
+    private Long type;
 }

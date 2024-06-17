@@ -8,6 +8,7 @@ spring:
         file-extension: yaml
         shared-configs:
           - data-id: api-gateway.yaml
+          - data-id: jackson-config.yaml
     gateway:
       discovery:
         locator:

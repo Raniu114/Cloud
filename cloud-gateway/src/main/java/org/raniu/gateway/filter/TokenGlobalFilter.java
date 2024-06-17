@@ -3,6 +3,9 @@ package org.raniu.gateway.filter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.raniu.api.enums.ResultCode;
+import org.raniu.api.vo.Result;
 import org.raniu.common.utils.TokenUtil;
 import org.raniu.gateway.config.TokenProperties;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -42,6 +45,7 @@ public class TokenGlobalFilter implements GlobalFilter, Ordered {
     private final TokenProperties tokenProperties;
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
+    @SneakyThrows
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -51,30 +55,16 @@ public class TokenGlobalFilter implements GlobalFilter, Ordered {
         Map<String, Object> data = new HashMap<>();
         MultiValueMap<String, HttpCookie> cookies = request.getCookies();
         ServerHttpResponse response = exchange.getResponse();
-        if (cookies.isEmpty() || cookies.get("AccessToken").isEmpty()) {
-            data.put("msg", "token不能为空");
-            data.put("status", -1);
-            return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
+        if (cookies.isEmpty() || cookies.get("AccessToken") == null) {
+            return jsonResponse(response, HttpStatus.UNAUTHORIZED, Result.error(ResultCode.MISSING, "token不能为空"));
         }
         String accessToken = cookies.get("AccessToken").get(0).getValue();
         Map<String, String> user = TokenUtil.verify(accessToken);
         String id = user.get("user");
         if ("-1".equals(id)) {
-            data.put("msg", "token过期");
-            data.put("status", -2);
-            return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
-        } else if ("-2".equals(id)) {
-            data.put("msg", "token格式错误");
-            data.put("status", -3);
-            return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
-        } else if ("-3".equals(id)) {
-            data.put("msg", "token签名错误");
-            data.put("status", -4);
-            return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
-        } else if ("-4".equals(id)) {
-            data.put("msg", "token异常");
-            data.put("status", -5);
-            return jsonResponse(response, HttpStatus.UNAUTHORIZED, data);
+            return jsonResponse(response, HttpStatus.UNAUTHORIZED, Result.error(ResultCode.TOKEN_TIMEOUT, "token过期"));
+        } else if ("-2".equals(id) || "-3".equals(id) || "-4".equals(id)) {
+            return jsonResponse(response, HttpStatus.UNAUTHORIZED, Result.error(ResultCode.TOKEN_ERROR, "token错误"));
         }
         exchange.mutate()
                 .request(builder -> builder.header("user", id).header("permission", user.get("permission")).header("auth", user.get("auth"))).build();
@@ -95,16 +85,11 @@ public class TokenGlobalFilter implements GlobalFilter, Ordered {
         return false;
     }
 
-    private static Mono<Void> jsonResponse(ServerHttpResponse resp, HttpStatus status, Object data) {
-        String body;
-        try {
-            body = new ObjectMapper().writeValueAsString(data);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(e);
-        }
+    private static Mono<Void> jsonResponse(ServerHttpResponse resp, HttpStatus status, Result<String> data) throws JsonProcessingException {
         resp.setStatusCode(status);
         resp.getHeaders().add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        DataBuffer buffer = resp.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
+        ObjectMapper objectMapper = new ObjectMapper();
+        DataBuffer buffer = resp.bufferFactory().wrap(objectMapper.writeValueAsBytes(data));
         return resp.writeWith(Flux.just(buffer));
     }
 }

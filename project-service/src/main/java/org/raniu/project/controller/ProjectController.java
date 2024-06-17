@@ -9,10 +9,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
+import org.raniu.api.vo.Result;
+import org.raniu.project.domain.po.ProjectPo;
 import org.raniu.project.domain.vo.ProjectVo;
 import org.raniu.project.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 /**
@@ -37,7 +41,7 @@ public class ProjectController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
-    public String addProject(@RequestBody @Valid ProjectVo projectVo, HttpServletRequest request, HttpServletResponse response) {
+    public Result<ProjectPo> addProject(@RequestBody @Valid ProjectVo projectVo, HttpServletRequest request, HttpServletResponse response) {
         return this.projectService.addProject(projectVo, response);
     }
 
@@ -46,7 +50,7 @@ public class ProjectController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
-    public String updateProject(@RequestBody @Valid ProjectVo projectVo, HttpServletRequest request, HttpServletResponse response) {
+    public Result<ProjectPo> updateProject(@RequestBody @Valid ProjectVo projectVo, HttpServletRequest request, HttpServletResponse response) {
         return this.projectService.updateProject(projectVo, response);
     }
 
@@ -56,7 +60,7 @@ public class ProjectController {
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
     @Parameter(name = "id", description = "项目id")
-    public String deleteProject(@RequestParam(name = "id") String id, HttpServletResponse response, HttpServletRequest request) {
+    public Result<ProjectPo> deleteProject(@RequestParam(name = "id") String id, HttpServletResponse response, HttpServletRequest request) {
         return this.projectService.deleteProject(id, response);
     }
 
@@ -69,7 +73,7 @@ public class ProjectController {
             @Parameter(name = "page", description = "页码"),
             @Parameter(name = "size", description = "最大条目数")
     })
-    public String projectList(@RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletRequest request, HttpServletResponse response) {
+    public Result<List<ProjectVo>> projectList(@RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletRequest request, HttpServletResponse response) {
         return this.projectService.listProject(page, size, response);
     }
 
@@ -79,7 +83,7 @@ public class ProjectController {
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
     @Parameter(name = "id", description = "项目id")
-    public String getProject(@RequestParam(name = "id") String id, HttpServletResponse response, HttpServletRequest request) {
+    public Result<ProjectVo> getProject(@RequestParam(name = "id") String id, HttpServletResponse response, HttpServletRequest request) {
         return this.projectService.getProject(id, response);
     }
 
@@ -94,7 +98,7 @@ public class ProjectController {
             @Parameter(name = "page", description = "页码"),
             @Parameter(name = "size", description = "最大条目数")
     })
-    public String selectProject(@RequestParam(name = "key") String key, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
+    public Result<List<ProjectVo>> selectProject(@RequestParam(name = "key") String key, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
         return this.projectService.selectProject(key, page, size, response);
     }
 }

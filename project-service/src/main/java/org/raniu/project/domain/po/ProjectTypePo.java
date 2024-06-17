@@ -8,33 +8,25 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
- * <p>
- *
- * </p>
- *
- * @author raniu
- * @since 2023-12-11
+ * @projectName: IOTCloud
+ * @package: org.raniu.project.domain.po
+ * @className: ProjectTypePo
+ * @author: Raniu
+ * @description: TODO
+ * @date: 2024/6/17 16:53
+ * @version: 1.0
  */
+
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("project")
-public class ProjectPo implements Serializable {
+@TableName("project_type")
+public class ProjectTypePo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id")
-    private String id;
+    private Long id;
 
-    private String name;
-
-    private Long owner;
-
-    private Long creatUser;
-
-    private Long creatTime;
-
-    private String addr;
-
-    private Long type;
+    private String typeName;
 
 }

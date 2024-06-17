@@ -33,4 +33,17 @@ public class ProjectVo {
 
     @Schema(description = "项目地址", name = "addr", required = false)
     private String addr;
+
+    @Schema(description = "项目类型", name = "type", required = true)
+    private Long type;
+
+    @Schema(description = "项目类型名称", name = "typeName", required = false)
+    private String typeName;
+
+    @Schema(description = "项目创建人", name = "creatUser", required = false)
+    private Long creatUser;
+
+    @Schema(description = "项目创建时间", name = "creatTime", required = false)
+    private Long creatTime;
+
 }

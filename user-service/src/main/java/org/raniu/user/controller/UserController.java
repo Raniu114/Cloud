@@ -10,6 +10,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.raniu.api.dto.UserDTO;
+import org.raniu.api.vo.Result;
+import org.raniu.user.domain.po.UserPo;
 import org.raniu.user.domain.vo.UserLoginVo;
 import org.raniu.user.domain.vo.UserVo;
 import org.raniu.user.service.UserService;
@@ -17,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -41,10 +46,7 @@ public class UserController {
             @ApiResponse(responseCode = "412", description = "找不到用户"),
             @ApiResponse(responseCode = "400", description = "密钥错误")
     })
-    public String loginAdmin(@RequestBody @Valid UserLoginVo userLoginVo, BindingResult bindingResult, HttpServletResponse response, HttpServletRequest request) {
-        for (ObjectError error : bindingResult.getAllErrors()) {
-            return error.getDefaultMessage();
-        }
+    public Result<UserDTO> loginAdmin(@RequestBody @Valid UserLoginVo userLoginVo, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.loginAdmin(userLoginVo, response);
     }
 
@@ -54,10 +56,7 @@ public class UserController {
             @ApiResponse(responseCode = "412", description = "找不到用户"),
             @ApiResponse(responseCode = "400", description = "密钥错误")
     })
-    public String loginUser(@RequestBody @Valid UserLoginVo userLoginVo, BindingResult bindingResult, HttpServletResponse response, HttpServletRequest request) {
-        for (ObjectError error : bindingResult.getAllErrors()) {
-            return error.getDefaultMessage();
-        }
+    public Result<UserDTO> loginUser(@RequestBody @Valid UserLoginVo userLoginVo, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.loginUser(userLoginVo, response);
     }
 
@@ -68,7 +67,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "未携带token"),
             @ApiResponse(responseCode = "412", description = "找不到用户")
     })
-    public String getToken(@CookieValue(name = "RefreshToken") String refreshToken, HttpServletResponse response, HttpServletRequest request) {
+    public Result<UserDTO> getToken(@CookieValue(name = "RefreshToken", required = false) String refreshToken, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.getToken(refreshToken, response);
     }
 
@@ -79,10 +78,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "权限不足"),
             @ApiResponse(responseCode = "400", description = "密钥错误")
     })
-    public String addUser(@RequestBody @Valid UserVo userVo, BindingResult bindingResult, HttpServletResponse response, HttpServletRequest request) {
-        for (ObjectError error : bindingResult.getAllErrors()) {
-            return error.getDefaultMessage();
-        }
+    public Result<UserVo> addUser(@RequestBody @Valid UserVo userVo, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.addUser(userVo, response);
     }
 
@@ -97,7 +93,7 @@ public class UserController {
             @Parameter(name = "page", description = "分页页码", required = true),
             @Parameter(name = "size", description = "单页长度", required = true)
     })
-    public String userList(@RequestParam("page") Integer page, @RequestParam("size") Integer size, HttpServletRequest request, HttpServletResponse response) {
+    public Result<List<UserPo>> userList(@RequestParam("page") Integer page, @RequestParam("size") Integer size, HttpServletRequest request, HttpServletResponse response) {
         return this.userService.userList(page, size, response);
     }
 
@@ -109,7 +105,7 @@ public class UserController {
             @ApiResponse(responseCode = "412", description = "参数缺失或找不到用户")
     })
     @Parameter(name = "id", description = "用户id")
-    public String deleteUser(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
+    public Result<UserVo> deleteUser(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.delUser(id, response);
     }
 
@@ -121,10 +117,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "权限不足"),
             @ApiResponse(responseCode = "412", description = "找不到用户")
     })
-    public String updateUser(@RequestBody @Valid UserVo userVo, BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) {
-        for (ObjectError error : bindingResult.getAllErrors()) {
-            return error.getDefaultMessage();
-        }
+    public Result<UserVo> updateUser(@RequestBody @Valid UserVo userVo, HttpServletRequest request, HttpServletResponse response) {
         return this.userService.updateUser(userVo, response);
     }
 
@@ -136,7 +129,7 @@ public class UserController {
             @ApiResponse(responseCode = "412", description = "参数缺失或找不到用户")
     })
     @Parameter(name = "id", description = "用户id")
-    public String getUser(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
+    public Result<UserPo> getUser(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.getUser(id, response);
     }
 
@@ -152,7 +145,7 @@ public class UserController {
             @Parameter(name = "page", description = "页码"),
             @Parameter(name = "size", description = "最大条目数")
     })
-    public String selectUser(@RequestParam(name = "key") String key, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
+    public Result<List<UserPo>> selectUser(@RequestParam(name = "key") String key, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.selectUser(key, page, size, response);
     }
 

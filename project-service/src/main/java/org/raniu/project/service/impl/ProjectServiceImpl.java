@@ -1,20 +1,25 @@
 package org.raniu.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.json.JSONObject;
+import org.raniu.api.enums.ResultCode;
+import org.raniu.api.vo.Result;
 import org.raniu.common.enums.PermissionsEnum;
 import org.raniu.common.utils.UserContext;
 import org.raniu.project.domain.po.ProjectPo;
+import org.raniu.project.domain.po.ProjectTypePo;
 import org.raniu.project.domain.vo.ProjectVo;
 import org.raniu.project.mapper.ProjectMapper;
 import org.raniu.project.service.ProjectService;
+import org.raniu.project.service.ProjectTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 /**
@@ -31,26 +36,29 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, ProjectPo> im
     @Autowired
     private ProjectMapper projectMapper;
 
+    @Autowired
+    private ProjectTypeService projectTypeService;
+
     @Override
-    public Page<ProjectPo> list(Integer page, Integer size, Long userId, Integer permission) {
-        Page<ProjectPo> projectPage = new Page<>(page, size);
-        QueryWrapper<ProjectPo> queryWrapper = new QueryWrapper<>();
+    public IPage<ProjectVo> list(Integer page, Integer size, Long userId, Integer permission) {
+        Page<ProjectVo> projectPage = new Page<>(page, size);
+        QueryWrapper<ProjectVo> queryWrapper = new QueryWrapper<>();
         if (permission == PermissionsEnum.USER.ordinal()) {
             queryWrapper.eq("owner", userId);
         } else if (permission == PermissionsEnum.ADMIN.ordinal()) {
             queryWrapper.eq("create_user", userId);
         } else if (permission == PermissionsEnum.SUPER_ADMIN.ordinal()) {
-            return this.projectMapper.selectPage(projectPage, queryWrapper);
+            return this.projectMapper.findWithType(projectPage, queryWrapper);
         } else {
             return null;
         }
-        return this.projectMapper.selectPage(projectPage, queryWrapper);
+        return this.projectMapper.findWithType(projectPage, queryWrapper);
     }
 
     @Override
-    public Page<ProjectPo> select(String key, Long user, Integer page, Integer size, Integer permission) {
-        Page<ProjectPo> projectPage = new Page<>(page, size);
-        QueryWrapper<ProjectPo> queryWrapper = new QueryWrapper<>();
+    public IPage<ProjectVo> select(String key, Long user, Integer page, Integer size, Integer permission) {
+        Page<ProjectVo> projectPage = new Page<>(page, size);
+        QueryWrapper<ProjectVo> queryWrapper = new QueryWrapper<>();
         if (permission == PermissionsEnum.USER.ordinal()) {
             queryWrapper.like("name", key).eq("owner", user);
         } else if (permission == PermissionsEnum.ADMIN.ordinal()) {
@@ -60,117 +68,90 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, ProjectPo> im
         } else {
             return null;
         }
-        return this.projectMapper.selectPage(projectPage, queryWrapper);
+        return this.projectMapper.findWithType(projectPage, queryWrapper);
     }
 
     @Override
-    public String selectProject(String key, Integer page, Integer size, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<List<ProjectVo>> selectProject(String key, Integer page, Integer size, HttpServletResponse response) {
         if (key == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
+            return Result.error(ResultCode.MISSING,"参数不可为空");
         }
-        Page<ProjectPo> projects;
+        IPage<ProjectVo> projects;
         projects = select(key,UserContext.getUser(), page, size, UserContext.getPermissions());
-        jsonObject.put("status",1);
-        jsonObject.put("msg","获取成功");
-        jsonObject.put("projects",projects.getRecords());
-        jsonObject.put("pages",projects.getPages());
-        return jsonObject.toString();
+        return Result.success(projects.getRecords(),projects.getPages());
     }
 
     @Override
-    public String getProject(String id, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<ProjectVo> getProject(String id, HttpServletResponse response) {
         if (id == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
+            return Result.error(ResultCode.MISSING,"参数不可为空");
         }
         ProjectPo projectPo = getById(id);
         if (projectPo == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "未查询到项目");
-            return jsonObject.toString();
+            return Result.error(ResultCode.ERROR_PARAMETERS,"未查询到项目");
         }
-        jsonObject.put("status", 1);
-        jsonObject.put("msg", "获取成功");
-        jsonObject.put("project", BeanMap.create(projectPo));
-        return jsonObject.toString();
+        ProjectTypePo type = projectTypeService.getById(projectPo.getType());
+        ProjectVo projectVo = new ProjectVo();
+        projectVo.setCreatTime(projectPo.getCreatTime());
+        projectVo.setName(projectPo.getName());
+        projectVo.setType(type.getId());
+        projectVo.setAddr(projectPo.getAddr());
+        projectVo.setId(projectPo.getId());
+        projectVo.setOwner(projectPo.getOwner());
+        projectVo.setTypeName(type.getTypeName());
+        return Result.success(projectVo);
     }
 
     @Override
-    public String listProject(Integer page, Integer size, HttpServletResponse response) {
-
-        JSONObject jsonObject = new JSONObject();
+    public Result<List<ProjectVo>> listProject(Integer page, Integer size, HttpServletResponse response) {
         if (page == null || size == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
+            return Result.error(ResultCode.MISSING,"参数不可为空");
         }
-        Page<ProjectPo> projects;
+        IPage<ProjectVo> projects;
         projects = list(page, size, UserContext.getUser(), UserContext.getPermissions());
-
         if (!projects.getRecords().isEmpty()) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "获取成功");
-            jsonObject.put("projects", projects.getRecords());
-            jsonObject.put("pages", projects.getPages());
+            return Result.success(projects.getRecords(),projects.getPages());
         } else {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "获取失败");
+            return Result.error(ResultCode.ERROR_PARAMETERS,"获取失败");
         }
-        return jsonObject.toString();
     }
 
     @Override
-    public String deleteProject(String id, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<ProjectPo> deleteProject(String id, HttpServletResponse response) {
         if (id == null) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "参数不可为空");
-            return jsonObject.toString();
+            return Result.error(ResultCode.MISSING,"参数不可为空");
         }
         if (removeById(id)) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "删除成功");
+            return Result.success("删除成功");
         } else {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "未找到项目");
+            return Result.error(ResultCode.ERROR_PARAMETERS,"未查询到项目");
         }
-        return jsonObject.toString();
     }
 
     @Override
-    public String updateProject(ProjectVo projectVo, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<ProjectPo> updateProject(ProjectVo projectVo, HttpServletResponse response) {
         ProjectPo projectPo = new ProjectPo();
         projectPo.setOwner(projectVo.getOwner());
         projectPo.setName(projectVo.getName());
         projectPo.setId(projectVo.getId());
         projectPo.setAddr(projectVo.getAddr());
         if (updateById(projectPo)) {
-            jsonObject.put("status", 1);
-            jsonObject.put("msg", "更新成功");
+            return Result.success("更新成功");
         } else {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "更新失败");
+            return Result.error(ResultCode.ERROR_PARAMETERS,"更新失败");
         }
-        return jsonObject.toString();
     }
 
     @Override
-    public String addProject(ProjectVo projectVo, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<ProjectPo> addProject(ProjectVo projectVo, HttpServletResponse response) {
         ProjectPo projectPo = new ProjectPo();
         projectPo.setId(projectVo.getId());
         projectPo.setName(projectVo.getName());
@@ -180,12 +161,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, ProjectPo> im
         projectPo.setCreatTime(System.currentTimeMillis());
         if (!save(projectPo)) {
             response.setStatus(412);
-            jsonObject.put("status", -1);
-            jsonObject.put("msg", "添加失败，请检查id是否重复");
-            return jsonObject.toString();
+            return Result.error(ResultCode.ERROR_PARAMETERS,"添加失败，请检查id是否重复");
         }
-        jsonObject.put("status", 1);
-        jsonObject.put("msg", "添加成功");
-        return jsonObject.toString();
+        return Result.success("添加成功");
     }
 }

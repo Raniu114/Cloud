@@ -3,6 +3,7 @@ package org.raniu.project.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.raniu.api.dto.ProjectDTO;
 import org.raniu.api.vo.Result;
 import org.raniu.project.domain.po.ProjectPo;
 import org.raniu.project.domain.vo.ProjectVo;
@@ -20,15 +21,12 @@ import java.util.List;
  */
 public interface ProjectService extends IService<ProjectPo> {
 
-    IPage<ProjectVo> list(Integer page, Integer size, Long userId, Integer permission);
 
-    IPage<ProjectVo> select(String key, Long user, Integer page, Integer size, Integer permission);
+    Result<List<ProjectDTO>> selectProject(String key, Integer page, Integer size, HttpServletResponse response);
 
-    Result<List<ProjectVo>> selectProject(String key, Integer page, Integer size, HttpServletResponse response);
+    Result<ProjectDTO> getProject(String id, HttpServletResponse response);
 
-    Result<ProjectVo> getProject(String id, HttpServletResponse response);
-
-    Result<List<ProjectVo>> listProject(Integer page, Integer size, HttpServletResponse response);
+    Result<List<ProjectDTO>> listProject(Integer page, Integer size, HttpServletResponse response);
 
     Result<ProjectPo> deleteProject(String id, HttpServletResponse response);
 
@@ -36,4 +34,5 @@ public interface ProjectService extends IService<ProjectPo> {
 
     Result<ProjectPo> addProject(ProjectVo projectVo, HttpServletResponse response);
 
+    Result<List<ProjectDTO>> preciseSelectProject(List<String> keys, List<String> values, Integer page, Integer size, HttpServletResponse response);
 }

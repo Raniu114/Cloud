@@ -20,3 +20,8 @@ iot:
       - /swagger-ui.html/**
       - /**/v3/**
       - /**/api/**
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB

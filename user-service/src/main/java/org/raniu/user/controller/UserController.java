@@ -93,7 +93,7 @@ public class UserController {
             @Parameter(name = "page", description = "分页页码", required = true),
             @Parameter(name = "size", description = "单页长度", required = true)
     })
-    public Result<List<UserPo>> userList(@RequestParam("page") Integer page, @RequestParam("size") Integer size, HttpServletRequest request, HttpServletResponse response) {
+    public Result<List<UserDTO>> userList(@RequestParam("page") Integer page, @RequestParam("size") Integer size, HttpServletRequest request, HttpServletResponse response) {
         return this.userService.userList(page, size, response);
     }
 
@@ -129,7 +129,7 @@ public class UserController {
             @ApiResponse(responseCode = "412", description = "参数缺失或找不到用户")
     })
     @Parameter(name = "id", description = "用户id")
-    public Result<UserPo> getUser(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
+    public Result<UserDTO> getUser(@RequestParam("id") Long id, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.getUser(id, response);
     }
 
@@ -145,7 +145,7 @@ public class UserController {
             @Parameter(name = "page", description = "页码"),
             @Parameter(name = "size", description = "最大条目数")
     })
-    public Result<List<UserPo>> selectUser(@RequestParam(name = "key") String key, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
+    public Result<List<UserDTO>> selectUser(@RequestParam(name = "key") String key, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
         return this.userService.selectUser(key, page, size, response);
     }
 

@@ -35,13 +35,13 @@ public interface UserService extends IService<UserPo> {
 
     Result<UserVo> addUser(UserVo userVo, HttpServletResponse response);
 
-    Result<List<UserPo>> userList(Integer page, Integer size, HttpServletResponse response);
+    Result<List<UserDTO>> userList(Integer page, Integer size, HttpServletResponse response);
 
     Result<UserVo> delUser(Long id,HttpServletResponse response);
 
     Result<UserVo> updateUser(UserVo userVo, HttpServletResponse response);
 
-    Result<UserPo> getUser(Long id, HttpServletResponse response);
+    Result<UserDTO> getUser(Long id, HttpServletResponse response);
 
-    Result<List<UserPo>> selectUser(String key, Integer page, Integer size, HttpServletResponse response);
+    Result<List<UserDTO>> selectUser(String key, Integer page, Integer size, HttpServletResponse response);
 }

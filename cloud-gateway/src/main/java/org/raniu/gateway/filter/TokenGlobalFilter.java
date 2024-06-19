@@ -52,11 +52,10 @@ public class TokenGlobalFilter implements GlobalFilter, Ordered {
         if (isExclude(request.getPath().toString()) || "OPTIONS".equals(request.getMethod())) {
             return chain.filter(exchange);
         }
-        Map<String, Object> data = new HashMap<>();
         MultiValueMap<String, HttpCookie> cookies = request.getCookies();
         ServerHttpResponse response = exchange.getResponse();
         if (cookies.isEmpty() || cookies.get("AccessToken") == null) {
-            return jsonResponse(response, HttpStatus.UNAUTHORIZED, Result.error(ResultCode.MISSING, "token不能为空"));
+            return jsonResponse(response, HttpStatus.UNAUTHORIZED, Result.error(ResultCode.TOKEN_TIMEOUT, "token不能为空"));
         }
         String accessToken = cookies.get("AccessToken").get(0).getValue();
         Map<String, String> user = TokenUtil.verify(accessToken);

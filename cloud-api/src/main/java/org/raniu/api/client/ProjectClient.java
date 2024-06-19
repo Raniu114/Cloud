@@ -1,10 +1,14 @@
 package org.raniu.api.client;
 
+import org.raniu.api.dto.ProjectDTO;
+import org.raniu.api.vo.Result;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+
 
 /**
  * @projectName: IOTCloud
@@ -19,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @FeignClient("project-service")
 public interface ProjectClient {
 
+    @GetMapping("/project/get")
+    Result<ProjectDTO> getProject(@RequestParam("id") String id);
 
+    @GetMapping("/project/select/precise")
+    Result<List<ProjectDTO>> selectPrecise(@RequestParam("keys") List<String> keys, @RequestParam("values") List<String> values, @RequestParam("page") Integer page, @RequestParam("size") Integer size);
 
 }

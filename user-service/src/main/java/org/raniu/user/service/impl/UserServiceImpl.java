@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
@@ -103,8 +104,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         cookie1.setMaxAge(30 * 24 * 60 * 60);
         cookie1.setPath("/");
         cookie1.setDomain("zhxy.fjhnkj.com");
+        Cookie cookie2 = new Cookie("user_id", userDTO.getId().toString());
+        cookie1.setMaxAge(30 * 24 * 60 * 60);
+        cookie1.setPath("/");
+        cookie1.setDomain("zhxy.fjhnkj.com");
         response.addCookie(cookie);
         response.addCookie(cookie1);
+        response.addCookie(cookie2);
         return Result.success("登陆成功", userDTO);
     }
 
@@ -139,8 +145,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         cookie1.setMaxAge(30 * 24 * 60 * 60);
         cookie1.setPath("/");
         cookie1.setDomain("zhxy.fjhnkj.com");
+        Cookie cookie2 = new Cookie("user_id", userDTO.getId().toString());
+        cookie1.setMaxAge(30 * 24 * 60 * 60);
+        cookie1.setPath("/");
+        cookie1.setDomain("zhxy.fjhnkj.com");
         response.addCookie(cookie);
         response.addCookie(cookie1);
+        response.addCookie(cookie2);
         return Result.success("登陆成功", userDTO);
     }
 
@@ -148,7 +159,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
     public Result<UserDTO> getToken(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
             response.setStatus(401);
-            return Result.error(ResultCode.MISSING, "请提供Token");
+            return Result.error(ResultCode.TOKEN_TIMEOUT, "请提供Token");
         }
         Long u = this.tokenService.verifyUser(refreshToken);
         if (u == -1) {
@@ -175,7 +186,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         cookie.setSecure(true);
         cookie.setDomain("zhxy.fjhnkj.com");
         response.addCookie(cookie);
-        return Result.success("登陆成功", userDTO);
+        return Result.success("刷新成功", userDTO);
     }
 
     @Override
@@ -204,14 +215,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
     }
 
     @Override
-    public Result<List<UserPo>> userList(Integer page, Integer size, HttpServletResponse response) {
+    public Result<List<UserDTO>> userList(Integer page, Integer size, HttpServletResponse response) {
         if (page == null || size == null) {
             response.setStatus(412);
             return Result.error(ResultCode.MISSING,"参数不可为空");
         }
         Page<UserPo> users = list(page, size);
+        List<UserDTO> userDTOList = JSONUtil.toList(JSONUtil.toJsonStr(users.getRecords()), UserDTO.class);
         if (!users.getRecords().isEmpty()) {
-            return Result.success(users.getRecords(),users.getPages());
+            return Result.success(userDTOList,users.getPages());
         } else {
             response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS, "获取失败");
@@ -258,29 +270,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
     }
 
     @Override
-    public Result<UserPo> getUser(Long id, HttpServletResponse response) {
+    public Result<UserDTO> getUser(Long id, HttpServletResponse response) {
         if (id == null) {
             response.setStatus(412);
             return Result.error(ResultCode.MISSING,"参数不可为空");
         }
-
         UserPo user = getById(id);
         if (user == null) {
             response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS, "未找到用户");
         }
-        return Result.success(user);
+        return Result.success(JSONUtil.toBean(JSONUtil.toJsonStr(user), UserDTO.class));
     }
 
     @Override
-    public Result<List<UserPo>> selectUser(String key, Integer page, Integer size, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
+    public Result<List<UserDTO>> selectUser(String key, Integer page, Integer size, HttpServletResponse response) {
         if (key == null || page == null || size == null) {
             response.setStatus(412);
             return Result.error(ResultCode.MISSING,"参数不可为空");
         }
         Page<UserPo> users = select(key, page, size);
-        return Result.success(users.getRecords(),users.getPages());
+        List<UserDTO> userDTOList = JSONUtil.toList(JSONUtil.toJsonStr(users.getRecords()), UserDTO.class);
+        return Result.success(userDTOList,users.getPages());
     }
 
 }

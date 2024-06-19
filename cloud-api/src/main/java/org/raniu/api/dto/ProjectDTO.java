@@ -37,4 +37,7 @@ public class ProjectDTO {
 
     @ApiModelProperty("项目类型")
     private Long type;
+
+    @ApiModelProperty("项目类型名称")
+    private String typeName;
 }

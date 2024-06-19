@@ -5,7 +5,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import feign.Param;
+import org.apache.ibatis.annotations.Param;
+import org.raniu.api.dto.ProjectDTO;
 import org.raniu.project.domain.po.ProjectPo;
 import org.raniu.project.domain.vo.ProjectVo;
 
@@ -20,6 +21,6 @@ import org.raniu.project.domain.vo.ProjectVo;
  */
 public interface ProjectMapper extends BaseMapper<ProjectPo> {
 
-    IPage<ProjectVo> findWithType(Page<ProjectVo> page, @Param(Constants.WRAPPER) QueryWrapper<ProjectVo> queryWrapper);
+    IPage<ProjectDTO> findWithType(Page<ProjectDTO> page, @Param(Constants.WRAPPER) QueryWrapper<ProjectDTO> queryWrapper);
 
 }

@@ -9,5 +9,4 @@ spring:
         shared-configs:
           - data-id: swagger-config.yaml
           - data-id: jdbc-config.yaml
-          - data-id: openfeign-config.yaml
           - data-id: jackson-config.yaml

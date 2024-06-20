@@ -71,7 +71,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
         if (UserContext.getPermissions() == 1) {
             queryWrapper.eq("create_user", UserContext.getUser());
         }
-        queryWrapper.allEq(ArrayUtil.zip(ArrayUtil.toArray(keys,String.class),ArrayUtil.toArray(values,String.class)));
+        queryWrapper.allEq(ArrayUtil.zip(ArrayUtil.toArray(keys, String.class), ArrayUtil.toArray(values, String.class)));
         return this.deviceMapper.selectPage(devicePage, queryWrapper);
     }
 
@@ -176,7 +176,6 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
 
     @Override
     public Result<List<DeviceDTO>> selectDevice(List<String> keys,List<String> values, Integer page, Integer size, HttpServletResponse response) {
-        JSONObject jsonObject = new JSONObject();
         if (keys == null || values == null || keys.size() != values.size()) {
             response.setStatus(412);
             return Result.error(ResultCode.MISSING, "参数不可为空");

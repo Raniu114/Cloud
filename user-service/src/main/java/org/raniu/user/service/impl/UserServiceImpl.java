@@ -209,7 +209,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         if (save(user)) {
             return Result.success("添加成功");
         } else {
-            response.setStatus(500);
+            response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS,"添加失败");
         }
     }

@@ -83,7 +83,6 @@ public class DeviceController {
     @Parameters({
             @Parameter(name = "page", description = "分页页码", required = true),
             @Parameter(name = "size", description = "单页长度", required = true),
-            @Parameter(name = "projectId", description = "项目id", required = false)
     })
     public Result<List<DeviceDTO>> deviceList(@RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletRequest request, HttpServletResponse response) {
         return this.deviceService.deviceList(page, size, response);
@@ -107,7 +106,7 @@ public class DeviceController {
             @ApiResponse(responseCode = "403", description = "权限不足"),
             @ApiResponse(responseCode = "412", description = "参数缺失或找不到用户")
     })
-    public Result<List<DeviceDTO>> selectDevice(@RequestParam(name = "keys") List<String> keys,@RequestParam(name = "values") List<String> values, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, @RequestParam String projectId, HttpServletResponse response, HttpServletRequest request) {
+    public Result<List<DeviceDTO>> selectDevice(@RequestParam(name = "keys") List<String> keys,@RequestParam(name = "values") List<String> values, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
         return this.deviceService.selectDevice(keys,values,page,size,response);
     }
 

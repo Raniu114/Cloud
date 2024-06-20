@@ -35,4 +35,10 @@ public class DeviceDTO {
     @ApiModelProperty("获取间隔")
     private Float collectionTime;
 
+    @ApiModelProperty("创建时间")
+    private Long createTime;
+
+    @ApiModelProperty("创建人")
+    private Long createUser;
+
 }

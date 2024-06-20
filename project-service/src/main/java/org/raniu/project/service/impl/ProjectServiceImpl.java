@@ -193,6 +193,17 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, ProjectPo> im
             response.setStatus(412);
             return Result.error(ResultCode.MISSING, "参数不可为空");
         }
+        if (UserContext.getPermissions() == 1){
+            if (keys.contains("create_user")){
+                response.setStatus(403);
+                return Result.error(ResultCode.ERROR_PARAMETERS,"不符合权限的参数");
+            }
+        }else if (UserContext.getPermissions() == 0){
+            if (keys.contains("owner") || keys.contains("create_user")){
+                response.setStatus(403);
+                return Result.error(ResultCode.ERROR_PARAMETERS,"不符合权限的参数");
+            }
+        }
         IPage<ProjectDTO> projects = this.preciseSelect(keys, values, page, size);
         if (!projects.getRecords().isEmpty()) {
             return Result.success(projects.getRecords(), projects.getPages());

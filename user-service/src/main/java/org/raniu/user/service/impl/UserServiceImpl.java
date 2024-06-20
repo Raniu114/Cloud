@@ -105,9 +105,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         cookie1.setPath("/");
         cookie1.setDomain("zhxy.fjhnkj.com");
         Cookie cookie2 = new Cookie("user_id", userDTO.getId().toString());
-        cookie1.setMaxAge(30 * 24 * 60 * 60);
-        cookie1.setPath("/");
-        cookie1.setDomain("zhxy.fjhnkj.com");
+        cookie2.setMaxAge(30 * 24 * 60 * 60);
+        cookie2.setPath("/");
+        cookie2.setDomain("zhxy.fjhnkj.com");
         response.addCookie(cookie);
         response.addCookie(cookie1);
         response.addCookie(cookie2);
@@ -146,9 +146,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         cookie1.setPath("/");
         cookie1.setDomain("zhxy.fjhnkj.com");
         Cookie cookie2 = new Cookie("user_id", userDTO.getId().toString());
-        cookie1.setMaxAge(30 * 24 * 60 * 60);
-        cookie1.setPath("/");
-        cookie1.setDomain("zhxy.fjhnkj.com");
+        cookie2.setMaxAge(30 * 24 * 60 * 60);
+        cookie2.setPath("/");
+        cookie2.setDomain("zhxy.fjhnkj.com");
         response.addCookie(cookie);
         response.addCookie(cookie1);
         response.addCookie(cookie2);

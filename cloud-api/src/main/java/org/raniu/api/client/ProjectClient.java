@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Collection;
 import java.util.List;
 
 
@@ -27,6 +28,9 @@ public interface ProjectClient {
     Result<ProjectDTO> getProject(@RequestParam("id") String id);
 
     @GetMapping("/project/select/precise")
-    Result<List<ProjectDTO>> selectPrecise(@RequestParam("keys") List<String> keys, @RequestParam("values") List<String> values, @RequestParam("page") Integer page, @RequestParam("size") Integer size);
+    Result<List<ProjectDTO>> selectPrecise(@RequestParam("keys") Collection<String> keys, @RequestParam("values") Collection<String> values, @RequestParam("page") Integer page, @RequestParam("size") Integer size);
+
+    @GetMapping("/project/list")
+    Result<List<ProjectDTO>> list(@RequestParam("page") Integer page, @RequestParam("size") Integer size);
 
 }

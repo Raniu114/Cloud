@@ -34,6 +34,7 @@ public class DeviceVo {
     @NotNull(message = "设备通信协议不能为空")
     private String protocol;
 
+    @ApiModelProperty(value = "采集间隔", name = "collectionTime", required = false)
     private Float collectionTime;
 
 

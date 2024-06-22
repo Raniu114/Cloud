@@ -1,0 +1,14 @@
+server:
+  port: 8088
+
+iot:
+  name: 项目
+  mysql:
+    url: 127.0.0.1
+    port: 3306
+    username: iotcloud
+    password: ziLRMXPepHKRNjNZ
+    base: iotcloud
+
+mybatis-plus:
+  mapper-locations: classpath:/org/raniu/project/mapper/xml/*.xml

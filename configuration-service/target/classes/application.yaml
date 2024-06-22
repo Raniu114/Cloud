@@ -1,0 +1,16 @@
+server:
+  port: 8086
+
+iot:
+  name: 组态
+  mysql:
+    url: 127.0.0.1
+    port: 3306
+    username: iotcloud
+    password: ziLRMXPepHKRNjNZ
+    base: iotcloud
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB

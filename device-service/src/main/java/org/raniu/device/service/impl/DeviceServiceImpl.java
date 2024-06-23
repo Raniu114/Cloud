@@ -79,12 +79,12 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
     protected String getRandomString(int length) {
         String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < length; i++) {
             int number = random.nextInt(62);
-            sb.append(str.charAt(number));
+            stringBuilder.append(str.charAt(number));
         }
-        return sb.toString();
+        return stringBuilder.toString();
     }
 
     @Override
@@ -122,7 +122,6 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
     public Result<DeviceDTO> deleteDevice(String id, HttpServletResponse response) {
         if (id == null) {
             response.setStatus(412);
-            ;
             return Result.error(ResultCode.MISSING, "参数不可为空");
         }
         if (this.removeById(id)) {

@@ -1,6 +1,5 @@
 package org.raniu.device.service.impl;
 
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,21 +7,17 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
-import org.json.JSONObject;
 import org.raniu.api.client.ProjectClient;
 import org.raniu.api.dto.DeviceDTO;
 import org.raniu.api.dto.ProjectDTO;
-import org.raniu.api.dto.UserDTO;
 import org.raniu.api.enums.ResultCode;
 import org.raniu.api.vo.Result;
-import org.raniu.common.utils.TokenUtil;
 import org.raniu.common.utils.UserContext;
 import org.raniu.device.domain.po.DevicePo;
 import org.raniu.device.domain.vo.DeviceVo;
 import org.raniu.device.mapper.DeviceMapper;
 import org.raniu.device.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -51,7 +46,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
             queryWrapper.eq("create_user", UserContext.getUser());
         } else if (UserContext.getPermissions() == 0) {
             try {
-                Result<List<ProjectDTO>> listResult = projectClient.list(1, 999);
+                Result<List<ProjectDTO>> listResult = projectClient.list(1, -1);
                 List<String> projects = new ArrayList<>();
                 for (ProjectDTO projectDTO : listResult.getData()) {
                     projects.add(projectDTO.getId());
@@ -71,7 +66,13 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
         if (UserContext.getPermissions() == 1) {
             queryWrapper.eq("create_user", UserContext.getUser());
         }
-        queryWrapper.allEq(ArrayUtil.zip(ArrayUtil.toArray(keys, String.class), ArrayUtil.toArray(values, String.class)));
+        Iterator<String> keysIterator = keys.iterator();
+        Iterator<String> valueIterator = values.iterator();
+        Map<String,Object> map = new HashMap<>();
+        while (keysIterator.hasNext() && valueIterator.hasNext()) {
+            map.put(keysIterator.next(), valueIterator.next());
+        }
+        queryWrapper.allEq(map);
         return this.deviceMapper.selectPage(devicePage, queryWrapper);
     }
 
@@ -191,13 +192,13 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
                 return Result.error(ResultCode.ERROR_PARAMETERS,"不符合权限的参数");
             }
         }
-        Page<DevicePo> devicePoPage = this.select(keys, values, page, size);
+        Page<DevicePo> devicePoPage = this.select(keys, values, size, page);
         if (devicePoPage == null) {
             response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS, "未查询到设备");
         }
         if (UserContext.getPermissions() == 0){
-            Result<List<ProjectDTO>> list = this.projectClient.list(1, 999);
+            Result<List<ProjectDTO>> list = this.projectClient.list(1, -1);
             Set<String> set = new HashSet<>();
             for (ProjectDTO projectDTO : list.getData()){
                 set.add(projectDTO.getId());

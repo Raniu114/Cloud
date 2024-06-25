@@ -1,5 +1,4 @@
 server:
-  port: 8085
 
 iot:
   name: 设备
@@ -9,4 +8,3 @@ iot:
     username: iotcloud
     password: ziLRMXPepHKRNjNZ
     base: iotcloud
-

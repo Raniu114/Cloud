@@ -3,7 +3,8 @@ spring:
     name: device-service
   cloud:
     nacos:
-      server-addr: 127.0.0.1:8848
+#      server-addr: 127.0.0.1:8848
+      server-addr: 47.122.57.2:8848
       config:
         file-extension: yaml
         shared-configs:

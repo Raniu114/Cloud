@@ -214,6 +214,7 @@ public class ConfigurationServiceImpl extends ServiceImpl<ConfigurationMapper, C
         File file = new File(filePath, img);
         if (file.exists()) {
             response.addHeader("Content-Disposition", "inline;fileName=" + img);
+            response.addHeader("Content-Length", "" + file.length());
             byte[] buffer = new byte[1024];
             FileInputStream fis = null;
             BufferedInputStream bis = null;

@@ -7,13 +7,18 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
+import org.json.JSONObject;
 import org.raniu.api.client.ProjectClient;
+import org.raniu.api.client.SensorClient;
 import org.raniu.api.dto.DeviceDTO;
 import org.raniu.api.dto.ProjectDTO;
+import org.raniu.api.dto.SensorDTO;
 import org.raniu.api.enums.ResultCode;
 import org.raniu.api.vo.Result;
+import org.raniu.common.utils.RedisUtil;
 import org.raniu.common.utils.UserContext;
 import org.raniu.device.domain.po.DevicePo;
+import org.raniu.device.domain.vo.ControlVo;
 import org.raniu.device.domain.vo.DeviceVo;
 import org.raniu.device.mapper.DeviceMapper;
 import org.raniu.device.service.DeviceService;
@@ -38,6 +43,12 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
 
     @Resource
     private ProjectClient projectClient;
+
+    @Autowired
+    private SensorClient sensorClient;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     protected Page<DevicePo> list(Integer page, Integer size) {
         Page<DevicePo> devicePage = new Page<>(page, size);
@@ -210,5 +221,67 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
             }
         }
         return Result.success(JSONUtil.toList(JSONUtil.toJsonStr(devicePoPage.getRecords()), DeviceDTO.class), devicePoPage.getPages());
+    }
+
+    @Override
+    public Result<String> control(String device, ControlVo controlVo, HttpServletResponse response) {
+        if (device.isEmpty()) {
+            response.setStatus(412);
+            return Result.error(ResultCode.MISSING, "参数不可为空");
+        }
+        DevicePo device1 = this.getById(device);
+        if (redisUtil.getHashEntries(device).isEmpty()) {
+            response.setStatus(412);
+            return Result.error(ResultCode.ERROR_PARAMETERS, "设备不在线");
+        }
+        if ("TCP-T".equals(device1.getProtocol()) && controlVo.getTag() == null) {
+            JSONObject jsonObject1 = new JSONObject();
+            jsonObject1.put("device", device);
+            jsonObject1.put("command", controlVo.getValue());
+            jsonObject1.put("cmdid", this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-");
+            redisUtil.sendMsg("tc", jsonObject1.toString());
+            return Result.success("发送成功");
+        }
+        SensorDTO sensor = sensorClient.getSensor(controlVo.getTag(),device).getData();
+        if (sensor == null) {
+            response.setStatus(412);
+            return Result.error(ResultCode.ERROR_PARAMETERS, "未查询到执行器");
+        }
+        if ("TCP-T".equals(device1.getProtocol())) {
+            JSONObject jsonObject1 = new JSONObject();
+            jsonObject1.put("cmdid", this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-");
+            jsonObject1.put("device", device);
+            if (sensor.getType() == 2) {
+                StringBuilder command = new StringBuilder(Integer.toHexString(Integer.parseInt(controlVo.getValue())));
+                while (command.length() % 4 != 0)
+                    command.insert(0, "0");
+                jsonObject1.put("command", command.toString());
+            } else {
+                if ("1".equals(controlVo.getValue())) {
+                    jsonObject1.put("command", sensor.getCon());
+                } else {
+                    jsonObject1.put("command", sensor.getCoff());
+                }
+            }
+            jsonObject1.put("start", sensor.getStart());
+            jsonObject1.put("tag", sensor.getId());
+            String fun = sensor.getFunc();
+            if ("01".equals(fun)) {
+                jsonObject1.put("func", "05");
+            } else if ("03".equals(fun)) {
+                jsonObject1.put("func", "06");
+            }
+            jsonObject1.put("addr", sensor.getAddr());
+            redisUtil.sendMsg("tc", jsonObject1.toString());
+        } else {
+            JSONObject jsonObject1 = new JSONObject();
+            jsonObject1.put("cmdid", this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-");
+            jsonObject1.put("device", device);
+            jsonObject1.put("tag", controlVo.getTag());
+            jsonObject1.put("data", Integer.valueOf(controlVo.getValue()));
+            redisUtil.sendMsg("control", jsonObject1.toString());
+        }
+
+        return Result.success("发送成功");
     }
 }

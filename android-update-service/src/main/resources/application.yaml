@@ -1,0 +1,10 @@
+server:
+  port: 8083
+
+iot:
+  name: Android更新
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB

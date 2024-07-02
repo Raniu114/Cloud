@@ -25,6 +25,8 @@
         <module>configuration-service</module>
         <module>cloud-gateway</module>
         <module>cloud-api</module>
+        <module>android-update-service</module>
+        <module>sse-service</module>
     </modules>
     <properties>
         <java.version>17</java.version>

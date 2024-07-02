@@ -1,8 +1,11 @@
 package org.raniu.common.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +25,8 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtil {
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
+
     /**
      * 给一个指定的 key 值附加过期时间
      *
@@ -33,6 +37,7 @@ public class RedisUtil {
     public boolean expire(String key, long time) {
         return redisTemplate.expire(key, time, TimeUnit.SECONDS);
     }
+
     /**
      * 根据key 获取过期时间
      *
@@ -42,6 +47,7 @@ public class RedisUtil {
     public long getTime(String key) {
         return redisTemplate.getExpire(key, TimeUnit.SECONDS);
     }
+
     /**
      * 根据key 获取过期时间
      *
@@ -51,6 +57,7 @@ public class RedisUtil {
     public boolean hasKey(String key) {
         return redisTemplate.hasKey(key);
     }
+
     /**
      * 移除指定key 的过期时间
      *
@@ -61,6 +68,15 @@ public class RedisUtil {
         return redisTemplate.boundValueOps(key).persist();
     }
 
+    /**
+     * 获取所有key
+     *
+     * @param pattern
+     * @return
+     */
+    public String[] keys(String pattern) {
+        return redisTemplate.keys(pattern).stream().map(k -> k).toArray(String[]::new);
+    }
     //- - - - - - - - - - - - - - - - - - - - -  String类型 - - - - - - - - - - - - - - - - - - - -
 
     /**
@@ -528,8 +544,9 @@ public class RedisUtil {
     public void rightPop(String key, long timeout, TimeUnit unit) {
         redisTemplate.opsForList().rightPop(key, timeout, unit);
     }
+
     //- - - - - - - - - - - - - - - - - - - - -  发 布 消 息 - - - - - - - - - - - - - - - - - - - -
-    public void sendMsg(String channel, String msg){
+    public void sendMsg(String channel, String msg) {
         redisTemplate.convertAndSend(channel, msg);
     }
 }

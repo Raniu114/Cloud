@@ -1,6 +1,8 @@
 package org.raniu.device.controller;
 
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -12,9 +14,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.raniu.api.dto.DeviceDTO;
 import org.raniu.api.vo.Result;
+import org.raniu.device.domain.vo.ControlVo;
 import org.raniu.device.domain.vo.DeviceVo;
 import org.raniu.device.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -106,6 +110,19 @@ public class DeviceController {
     })
     public Result<List<DeviceDTO>> selectDevice(@RequestParam(name = "keys") List<String> keys,@RequestParam(name = "values") List<String> values, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
         return this.deviceService.selectDevice(keys,values,page,size,response);
+    }
+
+    @PostMapping("/control/{device}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "device", value = "分页页码", required = true, dataType = "String", paramType = "path")
+    })
+    @io.swagger.annotations.ApiResponses({
+            @io.swagger.annotations.ApiResponse(code = 401, message = "未携带token"),
+            @io.swagger.annotations.ApiResponse(code = 403, message = "权限不足"),
+            @io.swagger.annotations.ApiResponse(code = 412, message = "找不到传感器或设备不在线")
+    })
+    public Result<String> control(@PathVariable("device") String device, @RequestBody ControlVo controlVo, HttpServletRequest request, HttpServletResponse response, BindingResult bindingResult) {
+        return this.deviceService.control(device, controlVo, response);
     }
 }
 

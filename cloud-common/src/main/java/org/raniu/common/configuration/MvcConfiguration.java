@@ -27,30 +27,34 @@ public class MvcConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new UserInterceptor())// 指定拦截器
                 .addPathPatterns("/**")
                 .excludePathPatterns("/**/login/**"
-                        ,"/**/token"
-                        ,"/doc.html/**"
-                        ,"/RSA/**"
-                        ,"/favicon.ico"
-                        ,"/error"
-                        ,"/swagger-ui/**"
-                        ,"/swagger-resources/**"
-                        ,"/webjars/**"
-                        ,"/v3/**"
-                        ,"/api/**"
-                        ,"/swagger-ui.html/**");
+                        , "/**/token"
+                        , "/doc.html/**"
+                        , "/RSA/**"
+                        , "/favicon.ico"
+                        , "/error"
+                        , "/swagger-ui/**"
+                        , "/swagger-resources/**"
+                        , "/webjars/**"
+                        , "/v3/**"
+                        , "/api/**"
+                        , "/swagger-ui.html/**"
+                        , "/android/**"
+                        , "/sse/**");
         registry.addInterceptor(new AuthInterceptor())
-                .addPathPatterns("/**/add","/**/delete","/**/update","/**/list","/**/select")
+                .addPathPatterns("/**/add", "/**/delete", "/**/update", "/**/list", "/**/select")
                 .excludePathPatterns("/**/login/**"
-                        ,"/**/token"
-                        ,"/doc.html/**"
-                        ,"/RSA/**"
-                        ,"/favicon.ico"
-                        ,"/error"
-                        ,"/swagger-ui/**"
-                        ,"/swagger-resources/**"
-                        ,"/webjars/**"
-                        ,"/v3/**"
-                        ,"/api/**"
-                        ,"/swagger-ui.html/**");
+                        , "/**/token"
+                        , "/doc.html/**"
+                        , "/RSA/**"
+                        , "/favicon.ico"
+                        , "/error"
+                        , "/swagger-ui/**"
+                        , "/swagger-resources/**"
+                        , "/webjars/**"
+                        , "/v3/**"
+                        , "/api/**"
+                        , "/swagger-ui.html/**"
+                        , "/android/**"
+                        , "/sse/**");
     }
 }

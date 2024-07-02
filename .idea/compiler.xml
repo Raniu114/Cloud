@@ -9,20 +9,26 @@
         <outputRelativeToContentRoot value="true" />
         <module name="configuration-service" />
         <module name="cloud-api" />
-        <module name="history-service" />
         <module name="strategy-service" />
-        <module name="cloud-common" />
         <module name="user-service" />
         <module name="sensor-service" />
+        <module name="cloud-gateway" />
+        <module name="history-service" />
+        <module name="cloud-common" />
         <module name="device-service" />
         <module name="project-service" />
-        <module name="cloud-gateway" />
+        <module name="android-update-service" />
+        <module name="sse-service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="sse-common" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="IOTCloud" options="-parameters" />
+      <module name="android-update-service" options="-parameters" />
       <module name="cloud-api" options="-parameters" />
       <module name="cloud-common" options="-parameters" />
       <module name="cloud-gateway" options="-parameters" />
@@ -31,6 +37,8 @@
       <module name="history-service" options="-parameters" />
       <module name="project-service" options="-parameters" />
       <module name="sensor-service" options="-parameters" />
+      <module name="sse-common" options="-parameters" />
+      <module name="sse-service" options="-parameters" />
       <module name="strategy-service" options="-parameters" />
       <module name="user-service" options="-parameters" />
     </option>

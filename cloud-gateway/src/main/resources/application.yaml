@@ -20,6 +20,8 @@ iot:
       - /swagger-ui.html/**
       - /**/v3/**
       - /**/api/**
+      - /**/android/**
+      - /**/sse/**
 
 spring:
   servlet:

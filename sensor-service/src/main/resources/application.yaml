@@ -1,10 +1,12 @@
 server:
-  port: 8085
+  port: 8089
+
 iot:
-  name: 设备
+  name: 传感器
   mysql:
     url: 127.0.0.1
     port: 3306
     username: iotcloud
     password: ziLRMXPepHKRNjNZ
     base: iotcloud
+

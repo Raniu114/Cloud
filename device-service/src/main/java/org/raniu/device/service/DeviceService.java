@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.raniu.api.dto.DeviceDTO;
 import org.raniu.api.vo.Result;
 import org.raniu.device.domain.po.DevicePo;
+import org.raniu.device.domain.vo.ControlVo;
 import org.raniu.device.domain.vo.DeviceVo;
 
 import java.util.List;
@@ -31,4 +32,6 @@ public interface DeviceService extends IService<DevicePo> {
     Result<DeviceDTO> getDevice(String id, HttpServletResponse response);
 
     Result<List<DeviceDTO>> selectDevice(List<String> keys, List<String> values, Integer page, Integer size, HttpServletResponse response);
+
+    Result<String> control(String device, ControlVo controlVo, HttpServletResponse response);
 }

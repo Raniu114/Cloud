@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: android-update-service
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: swagger-config.yaml
+          - data-id: jackson-config.yaml

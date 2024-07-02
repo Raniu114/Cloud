@@ -1,0 +1,11 @@
+server:
+  port: 8084
+
+iot:
+  name: SSE
+  redis:
+#    host: 127.0.0.1
+    host: 47.122.57.2
+    port: 6379
+    database: 0
+    password: 12345678

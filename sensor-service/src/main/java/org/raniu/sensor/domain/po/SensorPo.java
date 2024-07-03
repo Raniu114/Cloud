@@ -1,5 +1,6 @@
 package org.raniu.sensor.domain.po;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,6 +16,7 @@ import java.io.Serializable;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@TableName("sensor")
 public class SensorPo implements Serializable {
 
     private static final long serialVersionUID = 1L;

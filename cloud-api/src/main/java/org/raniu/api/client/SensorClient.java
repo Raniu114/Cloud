@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @version: 1.0
  */
 
-@FeignClient("/sensor-service")
+@FeignClient("sensor-service")
 public interface SensorClient {
 
     @GetMapping("/sensor/get")

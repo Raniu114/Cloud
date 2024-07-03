@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.raniu.api.dto.DeviceDTO;
+import org.raniu.api.dto.HistoryDTO;
 import org.raniu.api.vo.Result;
 import org.raniu.device.domain.po.DevicePo;
 import org.raniu.device.domain.vo.ControlVo;
@@ -34,4 +35,8 @@ public interface DeviceService extends IService<DevicePo> {
     Result<List<DeviceDTO>> selectDevice(List<String> keys, List<String> values, Integer page, Integer size, HttpServletResponse response);
 
     Result<String> control(String device, ControlVo controlVo, HttpServletResponse response);
+
+    Result<List<HistoryDTO>> getHistory(Integer page, Integer size, String deviceId, String sensorId,HttpServletResponse response);
+
+    Result<List<HistoryDTO>> getHistoryByTime(Integer page, Integer size,String deviceId, String sensorId, Long startTime, Long endTime, HttpServletResponse response);
 }

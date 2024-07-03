@@ -39,7 +39,8 @@ public class MvcConfiguration implements WebMvcConfigurer {
                         , "/api/**"
                         , "/swagger-ui.html/**"
                         , "/android/**"
-                        , "/sse/**");
+                        , "/sse/**"
+                        , "/**/control/**");
         registry.addInterceptor(new AuthInterceptor())
                 .addPathPatterns("/**/add", "/**/delete", "/**/update", "/**/list", "/**/select")
                 .excludePathPatterns("/**/login/**"
@@ -55,6 +56,7 @@ public class MvcConfiguration implements WebMvcConfigurer {
                         , "/api/**"
                         , "/swagger-ui.html/**"
                         , "/android/**"
-                        , "/sse/**");
+                        , "/sse/**"
+                        , "/**/control/**");
     }
 }

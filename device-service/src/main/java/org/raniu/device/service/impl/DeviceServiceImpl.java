@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import org.raniu.api.client.ProjectClient;
 import org.raniu.api.client.SensorClient;
 import org.raniu.api.dto.DeviceDTO;
+import org.raniu.api.dto.HistoryDTO;
 import org.raniu.api.dto.ProjectDTO;
 import org.raniu.api.dto.SensorDTO;
 import org.raniu.api.enums.ResultCode;
@@ -18,9 +19,11 @@ import org.raniu.api.vo.Result;
 import org.raniu.common.utils.RedisUtil;
 import org.raniu.common.utils.UserContext;
 import org.raniu.device.domain.po.DevicePo;
+import org.raniu.device.domain.po.HistoryPo;
 import org.raniu.device.domain.vo.ControlVo;
 import org.raniu.device.domain.vo.DeviceVo;
 import org.raniu.device.mapper.DeviceMapper;
+import org.raniu.device.mapper.HistoryMapper;
 import org.raniu.device.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +43,9 @@ import java.util.*;
 public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> implements DeviceService {
     @Autowired
     private DeviceMapper deviceMapper;
+
+    @Autowired
+    private HistoryMapper historyMapper;
 
     @Resource
     private ProjectClient projectClient;
@@ -96,6 +102,29 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
             stringBuilder.append(str.charAt(number));
         }
         return stringBuilder.toString();
+    }
+
+    public Page<HistoryPo> selectHistory(Integer page, Integer size, String deviceId, String sensorId, Long startTime, Long endTime) {
+
+        QueryWrapper<HistoryPo> queryWrapper = new QueryWrapper<>();
+        Page<HistoryPo> historyPage = new Page<>(page, size, false);
+        if (sensorId.isEmpty()) {
+            queryWrapper.eq("device_id", deviceId).between("time", startTime, endTime);
+        } else {
+            queryWrapper.eq("device_id", deviceId).eq("sensor_id", sensorId).between("time", startTime, endTime);
+        }
+        return historyMapper.selectPage(historyPage,queryWrapper);
+    }
+
+    public Page<HistoryPo> getHistory(Integer page, Integer size, String deviceId, String sensorId) {
+        QueryWrapper<HistoryPo> queryWrapper = new QueryWrapper<>();
+        Page<HistoryPo> historyPage = new Page<>(page, size, false);
+        if (sensorId.isEmpty()) {
+            queryWrapper.eq("device_id", deviceId);
+        } else {
+            queryWrapper.eq("device_id", deviceId).eq("sensor_id", sensorId);
+        }
+        return historyMapper.selectPage(historyPage,queryWrapper);
     }
 
     @Override
@@ -283,5 +312,36 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
         }
 
         return Result.success("发送成功");
+    }
+
+    @Override
+    public Result<List<HistoryDTO>> getHistory(Integer page, Integer size, String deviceId, String sensorId,HttpServletResponse response) {
+        if (deviceId == null) {
+            response.setStatus(412);
+            return Result.error(ResultCode.MISSING, "参数不可为空");
+        }
+        Page<HistoryPo> historyPoPage = this.getHistory(page, size, deviceId, sensorId);
+        if (historyPoPage.getRecords().isEmpty()) {
+            response.setStatus(412);
+            return Result.error(ResultCode.ERROR_PARAMETERS, "获取失败");
+        }
+        return Result.success(JSONUtil.toList(JSONUtil.toJsonStr(historyPoPage), HistoryDTO.class), historyPoPage.getPages());
+    }
+
+    @Override
+    public Result<List<HistoryDTO>> getHistoryByTime(Integer page, Integer size,String deviceId, String sensorId, Long startTime, Long endTime, HttpServletResponse response) {
+        if (deviceId == null || startTime == null) {
+            response.setStatus(412);
+            return Result.error(ResultCode.MISSING, "参数不可为空");
+        }
+        if (endTime == null) {
+            endTime = System.currentTimeMillis();
+        }
+        Page<HistoryPo> historyPoPage = this.selectHistory(page, size, deviceId, sensorId, startTime, endTime);
+        if (historyPoPage.getRecords().isEmpty()) {
+            response.setStatus(412);
+            return Result.error(ResultCode.ERROR_PARAMETERS, "获取失败");
+        }
+        return Result.success(JSONUtil.toList(JSONUtil.toJsonStr(historyPoPage), HistoryDTO.class), historyPoPage.getPages());
     }
 }

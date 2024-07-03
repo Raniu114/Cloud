@@ -3,6 +3,7 @@ package org.raniu.device.controller;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -12,7 +13,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.json.JSONObject;
 import org.raniu.api.dto.DeviceDTO;
+import org.raniu.api.dto.HistoryDTO;
 import org.raniu.api.vo.Result;
 import org.raniu.device.domain.vo.ControlVo;
 import org.raniu.device.domain.vo.DeviceVo;
@@ -22,6 +25,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -97,7 +101,7 @@ public class DeviceController {
             @ApiResponse(responseCode = "412", description = "参数缺失或找不到设备")
     })
     public Result<DeviceDTO> getDevice(@RequestParam(name = "id") String id, HttpServletResponse response, HttpServletRequest request) {
-        return this.deviceService.getDevice(id,response);
+        return this.deviceService.getDevice(id, response);
     }
 
     @GetMapping("/select")
@@ -108,21 +112,57 @@ public class DeviceController {
             @ApiResponse(responseCode = "403", description = "权限不足"),
             @ApiResponse(responseCode = "412", description = "参数缺失或找不到用户")
     })
-    public Result<List<DeviceDTO>> selectDevice(@RequestParam(name = "keys") List<String> keys,@RequestParam(name = "values") List<String> values, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
-        return this.deviceService.selectDevice(keys,values,page,size,response);
+    public Result<List<DeviceDTO>> selectDevice(@RequestParam(name = "keys") List<String> keys, @RequestParam(name = "values") List<String> values, @RequestParam(name = "page") Integer page, @RequestParam(name = "size") Integer size, HttpServletResponse response, HttpServletRequest request) {
+        return this.deviceService.selectDevice(keys, values, page, size, response);
     }
 
     @PostMapping("/control/{device}")
+    @Operation(summary = "设备控制", description = "控制设备")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "device", value = "分页页码", required = true, dataType = "String", paramType = "path")
+            @ApiImplicitParam(name = "device", value = "设备id", required = true, dataType = "String", paramType = "path")
     })
-    @io.swagger.annotations.ApiResponses({
-            @io.swagger.annotations.ApiResponse(code = 401, message = "未携带token"),
-            @io.swagger.annotations.ApiResponse(code = 403, message = "权限不足"),
-            @io.swagger.annotations.ApiResponse(code = 412, message = "找不到传感器或设备不在线")
+    @ApiResponses({
+            @ApiResponse(responseCode = "401", description = "未携带token"),
+            @ApiResponse(responseCode = "403", description = "权限不足"),
+            @ApiResponse(responseCode = "412", description = "找不到传感器或设备不在线")
     })
     public Result<String> control(@PathVariable("device") String device, @RequestBody ControlVo controlVo, HttpServletRequest request, HttpServletResponse response, BindingResult bindingResult) {
         return this.deviceService.control(device, controlVo, response);
+    }
+
+    @GetMapping("/history/get")
+    @Operation(summary = "获取历史记录", description = "获取历史记录，如果仅提供设备id则查询设备下全部传感器数据，如果提供两个参数，则查询特定传感器数据")
+    @ApiResponses({
+            @ApiResponse(responseCode = "401", description = "未携带token"),
+            @ApiResponse(responseCode = "403", description = "权限不足"),
+            @ApiResponse(responseCode = "412", description = "参数缺失或没有设备")
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备id", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "sensorId", value = "传感器id", required = false, dataType = "String", paramType = "query")
+    })
+    public Result<List<HistoryDTO>> getHistory(@RequestParam("page") Integer page, @RequestParam("size") Integer size, @RequestParam("deviceId") String deviceId, @RequestParam("sensorId") String sensorId, HttpServletRequest request, HttpServletResponse response) {
+        return this.deviceService.getHistory(page, size, deviceId, sensorId, response);
+    }
+
+    @GetMapping("/history/time")
+    @Operation(summary = "根据时间获取历史记录", description = "根据时间获取历史记录，如果仅提供设备id则查询设备下全部传感器数据，如果提供传感器id，则查询特定传感器数据，如果给定结束时间则查询时间段，不给定默认结束时间为当前时间")
+    @ApiResponses({
+            @ApiResponse(responseCode = "401", description = "未携带token"),
+            @ApiResponse(responseCode = "403", description = "权限不足"),
+            @ApiResponse(responseCode = "412", description = "参数缺失或没有设备")
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备id", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "sensorId", value = "传感器id", required = false, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", required = false, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "页码", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "size", value = "最大条数", required = true, dataType = "String", paramType = "query"),
+
+    })
+    public Result<List<HistoryDTO>> getHistoryByTime(@RequestParam("deviceId") String deviceId, @RequestParam("sensorId") String sensorId, @RequestParam("page") Integer page, @RequestParam("size") Integer size, @RequestParam("startTime") Long startTime, @RequestParam("endTime") Long endTime, HttpServletRequest request, HttpServletResponse response) {
+        return this.deviceService.getHistoryByTime(page, size, deviceId, sensorId, startTime, endTime, response);
     }
 }
 

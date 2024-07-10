@@ -3,7 +3,7 @@ spring:
     name: sse-service
   cloud:
     nacos:
-#      server-addr: 127.0.0.1:8848
+      server-addr: 127.0.0.1:8848
       config:
         file-extension: yaml
         shared-configs:
@@ -11,4 +11,8 @@ spring:
           - data-id: jdbc-config.yaml
           - data-id: jackson-config.yaml
           - data-id: redis-config.yaml
-      server-addr: 47.122.57.2:8848
+          - data-id: cors-config.yaml
+    sentinel:
+      transport:
+        dashboard: 127.0.0.1:8080
+        port: 8719

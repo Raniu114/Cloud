@@ -23,7 +23,7 @@ public interface ConfigurationService extends IService<ConfigurationPo> {
 
     Result<ConfigurationPo> addConfiguration(ConfigurationVo configurationVo, HttpServletResponse response);
 
-    Result<ConfigurationPo> updateConfiguration(ConfigurationVo configurationVo, HttpServletResponse response);
+    Result<ConfigurationPo> updateConfiguration(Long id,ConfigurationVo configurationVo, HttpServletResponse response);
 
     Result<ConfigurationPo> delConfiguration(Long id, HttpServletResponse response);
 

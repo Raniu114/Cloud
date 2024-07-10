@@ -10,3 +10,8 @@ spring:
           - data-id: swagger-config.yaml
           - data-id: jdbc-config.yaml
           - data-id: jackson-config.yaml
+          - data-id: cors-config.yaml
+    sentinel:
+      transport:
+        dashboard: 127.0.0.1:8080
+        port: 8719

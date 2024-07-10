@@ -114,15 +114,20 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, ProjectPo> im
             response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS, "未查询到项目");
         }
-        ProjectTypePo type = projectTypeService.getById(projectPo.getType());
         ProjectDTO projectDTO = new ProjectDTO();
         projectDTO.setCreatTime(projectPo.getCreatTime());
         projectDTO.setName(projectPo.getName());
-        projectDTO.setType(type.getId());
         projectDTO.setAddr(projectPo.getAddr());
         projectDTO.setId(projectPo.getId());
         projectDTO.setOwner(projectPo.getOwner());
-        projectDTO.setTypeName(type.getTypeName());
+        if (projectPo.getType() != null){
+            ProjectTypePo type = projectTypeService.getById(projectPo.getType());
+            projectDTO.setTypeName(type.getTypeName());
+            projectDTO.setType(type.getId());
+        } else {
+            projectDTO.setTypeName(null);
+            projectDTO.setType(null);
+        }
         return Result.success(projectDTO);
     }
 

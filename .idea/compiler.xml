@@ -10,18 +10,18 @@
         <module name="configuration-service" />
         <module name="cloud-api" />
         <module name="strategy-service" />
+        <module name="cloud-common" />
         <module name="user-service" />
         <module name="sensor-service" />
-        <module name="cloud-gateway" />
-        <module name="history-service" />
-        <module name="cloud-common" />
         <module name="device-service" />
         <module name="project-service" />
+        <module name="cloud-gateway" />
         <module name="android-update-service" />
         <module name="sse-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="history-service" target="17" />
       <module name="sse-common" target="17" />
     </bytecodeTargetLevel>
   </component>

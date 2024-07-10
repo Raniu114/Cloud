@@ -44,6 +44,9 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
             return true;
         }
+        if ("OPTIONS".equals(request.getMethod())) {
+            return true;
+        }
         return false;
     }
 }

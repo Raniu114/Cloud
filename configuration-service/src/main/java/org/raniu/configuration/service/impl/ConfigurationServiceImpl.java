@@ -104,7 +104,7 @@ public class ConfigurationServiceImpl extends ServiceImpl<ConfigurationMapper, C
     }
 
     @Override
-    public Result<ConfigurationPo> updateConfiguration(ConfigurationVo configurationVo, HttpServletResponse response) {
+    public Result<ConfigurationPo> updateConfiguration(Long id, ConfigurationVo configurationVo, HttpServletResponse response) {
         try {
             projectClient.getProject(configurationVo.getProjectId());
         } catch (Exception e) {
@@ -120,7 +120,7 @@ public class ConfigurationServiceImpl extends ServiceImpl<ConfigurationMapper, C
         configuration.setProjectId(configurationVo.getProjectId());
         configuration.setName(configurationVo.getName());
         configuration.setPage(configurationVo.getPage());
-        configuration.setId(configuration.getId());
+        configuration.setId(id);
         if (!updateById(configuration)) {
             response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS, "修改失败,请检查id是否正确");
@@ -167,7 +167,6 @@ public class ConfigurationServiceImpl extends ServiceImpl<ConfigurationMapper, C
             } else {
                 return Result.error(ResultCode.PERMISSIONS_ERROR, "设备不存在");
             }
-
         }
         try {
             if (multipartFile.isEmpty()) {

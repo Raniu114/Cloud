@@ -64,8 +64,8 @@ public class ConfigurationController {
     @ApiResponse(responseCode = "401", description = "未携带token")
     @ApiResponse(responseCode = "403", description = "权限不足")
     @ApiResponse(responseCode = "412", description = "id可能重复")
-    public Result<ConfigurationPo> updateConfiguration(@RequestBody ConfigurationVo configurationVo, HttpServletRequest request, HttpServletResponse response, BindingResult bindingResult) {
-        return configurationService.updateConfiguration(configurationVo,response);
+    public Result<ConfigurationPo> updateConfiguration(@RequestParam("id") Long id,@RequestBody ConfigurationVo configurationVo, HttpServletRequest request, HttpServletResponse response, BindingResult bindingResult) {
+        return configurationService.updateConfiguration(id,configurationVo,response);
     }
 
     @PostMapping("/del")

@@ -23,7 +23,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         String[] uri = request.getRequestURI().split("/");
         cn.hutool.json.JSONObject authJson = JSONUtil.parseObj(UserContext.getAuth());
         if ("POST".equals(request.getMethod())) {
-            if ((int) authJson.get(uri[1]) < AuthEnum.READ_WRITE.ordinal()) {
+            if ((int) authJson.get("project_type".equals(String.valueOf(uri[1])) ? "project" : uri[1]) < AuthEnum.READ_WRITE.ordinal()) {
                 JSONObject jsonObject = new JSONObject();
                 response.setStatus(403);
                 jsonObject.put("status", -1);
@@ -34,7 +34,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
         if ("GET".equals(request.getMethod())) {
-            if ((int) authJson.get(uri[1]) == AuthEnum.NONE.ordinal()) {
+            if ((int) authJson.get("project_type".equals(String.valueOf(uri[1])) ? "project" : uri[1]) == AuthEnum.NONE.ordinal()) {
                 JSONObject jsonObject = new JSONObject();
                 response.setStatus(403);
                 jsonObject.put("status", -1);

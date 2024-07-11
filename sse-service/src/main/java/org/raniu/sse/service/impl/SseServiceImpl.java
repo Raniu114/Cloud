@@ -12,6 +12,8 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
+
 /**
  * @projectName: IOTCloud
  * @package: org.raniu.sse.service.impl
@@ -29,7 +31,7 @@ public class SseServiceImpl implements SseService {
     private SseClient sseClient;
 
     @Override
-    public SseEmitter createSse(String uid, String[] devices, HttpServletResponse response) {
+    public SseEmitter createSse(String uid, List<String> devices, HttpServletResponse response) {
         return sseClient.createSseEmitter(uid, devices);
     }
 

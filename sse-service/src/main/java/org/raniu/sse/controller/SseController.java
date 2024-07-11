@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
+
 /**
  * @projectName: IOTCloud
  * @package: org.raniu.sse.controller
@@ -27,7 +29,7 @@ public class SseController {
     private SseService service;
 
     @GetMapping("/create")
-    public SseEmitter createSse(@RequestParam("uid") String uid, @RequestParam("devices") String[] devices, HttpServletResponse response, HttpServletRequest request) {
+    public SseEmitter createSse(@RequestParam("uid") String uid, @RequestParam("devices") List<String> devices, HttpServletResponse response, HttpServletRequest request) {
         return this.service.createSse(uid, devices, response);
     }
 

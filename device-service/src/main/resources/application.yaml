@@ -8,4 +8,8 @@ iot:
     username: iotcloud
     password: ziLRMXPepHKRNjNZ
     base: iotcloud
-
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 12345678
+    database: 0

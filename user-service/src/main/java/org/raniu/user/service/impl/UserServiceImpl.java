@@ -50,9 +50,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
     public UserPo login(UserLoginVo userLoginVo, Integer permission) {
         QueryWrapper<UserPo> queryWrapper = new QueryWrapper<UserPo>();
         if (permission == 1) {
-            queryWrapper.eq("username", userLoginVo.getUsername()).eq("password", userLoginVo.getPassword()).ge("permissions", 1);
+            queryWrapper.eq("username", userLoginVo.getUsername()).ge("permissions", 1);
         } else {
-            queryWrapper.eq("username", userLoginVo.getUsername()).eq("password", userLoginVo.getPassword()).lt("permissions", 1);
+            queryWrapper.eq("username", userLoginVo.getUsername()).lt("permissions", 1);
         }
         return this.userMapper.selectOne(queryWrapper);
     }
@@ -77,82 +77,89 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
     public Result<UserDTO> loginAdmin(UserLoginVo userLoginVo, HttpServletResponse response) {
         try {
             userLoginVo.setPassword(this.rsaService.decrypt(userLoginVo.getPassword()));
+            UserPo user = login(userLoginVo, 1);
+            if (user == null) {
+                response.setStatus(412);
+                return Result.error(ResultCode.ERROR_PARAMETERS, "用户不存在");
+            }
+            if (!this.rsaService.decrypt(user.getPassword()).equals(userLoginVo.getPassword())) {
+                return Result.error(ResultCode.ERROR_PARAMETERS, "密码错误");
+            }
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(user.getId());
+            userDTO.setPermissions(user.getPermissions());
+            userDTO.setUsername(user.getUsername());
+            userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
+            response.setStatus(200);
+            Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
+            cookie.setMaxAge(30 * 60);
+            cookie.setSecure(true);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setDomain("zhxy.fjhnkj.com");
+            Cookie cookie1 = new Cookie("RefreshToken", this.tokenService.getRefreshToken(userDTO));
+            cookie1.setSecure(true);
+            cookie1.setHttpOnly(true);
+            cookie1.setMaxAge(30 * 24 * 60 * 60);
+            cookie1.setPath("/");
+            cookie1.setDomain("zhxy.fjhnkj.com");
+            Cookie cookie2 = new Cookie("user_id", userDTO.getId().toString());
+            cookie2.setMaxAge(30 * 24 * 60 * 60);
+            cookie2.setPath("/");
+            cookie2.setDomain("zhxy.fjhnkj.com");
+            response.addCookie(cookie);
+            response.addCookie(cookie1);
+            response.addCookie(cookie2);
+            return Result.success("登陆成功", userDTO);
         } catch (Exception e) {
             response.setStatus(400);
             return Result.error(ResultCode.ERROR_PARAMETERS, "请验证密钥是否正确");
         }
-        UserPo user = login(userLoginVo, 1);
-        if (user == null) {
-            response.setStatus(412);
-            return Result.error(ResultCode.ERROR_PARAMETERS, "用户不存在");
-        }
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setPermissions(user.getPermissions());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
-        response.setStatus(200);
-        Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
-        cookie.setMaxAge(30 * 60);
-        cookie.setSecure(true);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setDomain("zhxy.fjhnkj.com");
-        Cookie cookie1 = new Cookie("RefreshToken", this.tokenService.getRefreshToken(userDTO));
-        cookie1.setSecure(true);
-        cookie1.setHttpOnly(true);
-        cookie1.setMaxAge(30 * 24 * 60 * 60);
-        cookie1.setPath("/");
-        cookie1.setDomain("zhxy.fjhnkj.com");
-        Cookie cookie2 = new Cookie("user_id", userDTO.getId().toString());
-        cookie2.setMaxAge(30 * 24 * 60 * 60);
-        cookie2.setPath("/");
-        cookie2.setDomain("zhxy.fjhnkj.com");
-        response.addCookie(cookie);
-        response.addCookie(cookie1);
-        response.addCookie(cookie2);
-        return Result.success("登陆成功", userDTO);
+
     }
 
     @Override
     public Result<UserDTO> loginUser(UserLoginVo userLoginVo, HttpServletResponse response) {
         try {
             userLoginVo.setPassword(this.rsaService.decrypt(userLoginVo.getPassword()));
+            UserPo user = login(userLoginVo, 0);
+            if (user == null) {
+                response.setStatus(412);
+                return Result.error(ResultCode.ERROR_PARAMETERS, "用户不存在");
+            }
+            if (!this.rsaService.decrypt(user.getPassword()).equals(userLoginVo.getPassword())) {
+                return Result.error(ResultCode.ERROR_PARAMETERS, "密码错误");
+            }
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(user.getId());
+            userDTO.setPermissions(user.getPermissions());
+            userDTO.setUsername(user.getUsername());
+            userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
+            response.setStatus(200);
+            Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
+            cookie.setMaxAge(30 * 60);
+            cookie.setSecure(true);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setDomain("zhxy.fjhnkj.com");
+            Cookie cookie1 = new Cookie("RefreshToken", this.tokenService.getRefreshToken(userDTO));
+            cookie1.setSecure(true);
+            cookie1.setHttpOnly(true);
+            cookie1.setMaxAge(30 * 24 * 60 * 60);
+            cookie1.setPath("/");
+            cookie1.setDomain("zhxy.fjhnkj.com");
+            Cookie cookie2 = new Cookie("user_id", userDTO.getId().toString());
+            cookie2.setMaxAge(30 * 24 * 60 * 60);
+            cookie2.setPath("/");
+            cookie2.setDomain("zhxy.fjhnkj.com");
+            response.addCookie(cookie);
+            response.addCookie(cookie1);
+            response.addCookie(cookie2);
+            return Result.success("登陆成功", userDTO);
         } catch (Exception e) {
             response.setStatus(400);
             return Result.error(ResultCode.ERROR_PARAMETERS, "请验证密钥是否正确");
         }
-        UserPo user = login(userLoginVo, 0);
-        if (user == null) {
-            response.setStatus(412);
-            return Result.error(ResultCode.ERROR_PARAMETERS, "用户不存在");
-        }
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setPermissions(user.getPermissions());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setAuth(JSONUtil.parseObj(user.getAuth()));
-        response.setStatus(200);
-        Cookie cookie = new Cookie("AccessToken", this.tokenService.getAccessToken(userDTO));
-        cookie.setMaxAge(30 * 60);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setDomain("zhxy.fjhnkj.com");
-        Cookie cookie1 = new Cookie("RefreshToken", this.tokenService.getRefreshToken(userDTO));
-        cookie1.setSecure(true);
-        cookie1.setHttpOnly(true);
-        cookie1.setMaxAge(30 * 24 * 60 * 60);
-        cookie1.setPath("/");
-        cookie1.setDomain("zhxy.fjhnkj.com");
-        Cookie cookie2 = new Cookie("user_id", userDTO.getId().toString());
-        cookie2.setMaxAge(30 * 24 * 60 * 60);
-        cookie2.setPath("/");
-        cookie2.setDomain("zhxy.fjhnkj.com");
-        response.addCookie(cookie);
-        response.addCookie(cookie1);
-        response.addCookie(cookie2);
-        return Result.success("登陆成功", userDTO);
     }
 
     @Override
@@ -192,7 +199,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
     @Override
     public Result<UserVo> addUser(UserVo userVo, HttpServletResponse response) {
         try {
-            userVo.setPassword(this.rsaService.decrypt(userVo.getPassword()));
+            this.rsaService.decrypt(userVo.getPassword());
         } catch (Exception e) {
             response.setStatus(400);
             return Result.error(ResultCode.ERROR_PARAMETERS, "请验证密钥是否正确");

@@ -25,6 +25,7 @@ import org.raniu.device.domain.vo.DeviceVo;
 import org.raniu.device.mapper.DeviceMapper;
 import org.raniu.device.mapper.HistoryMapper;
 import org.raniu.device.service.DeviceService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,9 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
     @Autowired
     private RedisUtil redisUtil;
 
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
     protected Page<DevicePo> list(Integer page, Integer size) {
         Page<DevicePo> devicePage = new Page<>(page, size);
         QueryWrapper<DevicePo> queryWrapper = new QueryWrapper<>();
@@ -69,7 +73,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
                     projects.add(projectDTO.getId());
                 }
                 queryWrapper.in("owner", projects);
-            }catch (Exception e){
+            } catch (Exception e) {
                 return null;
             }
         }
@@ -82,10 +86,21 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
         QueryWrapper<DevicePo> queryWrapper = new QueryWrapper<>();
         if (UserContext.getPermissions() == 1) {
             queryWrapper.eq("create_user", UserContext.getUser());
+        } else if (UserContext.getPermissions() == 0) {
+            try {
+                Result<List<ProjectDTO>> listResult = projectClient.list(1, -1);
+                List<String> projects = new ArrayList<>();
+                for (ProjectDTO projectDTO : listResult.getData()) {
+                    projects.add(projectDTO.getId());
+                }
+                queryWrapper.in("owner", projects);
+            } catch (Exception e) {
+                return null;
+            }
         }
         Iterator<String> keysIterator = keys.iterator();
         Iterator<String> valueIterator = values.iterator();
-        Map<String,Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         while (keysIterator.hasNext() && valueIterator.hasNext()) {
             map.put(keysIterator.next(), valueIterator.next());
         }
@@ -113,7 +128,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
         } else {
             queryWrapper.eq("device_id", deviceId).eq("sensor_id", sensorId).between("time", startTime, endTime);
         }
-        return historyMapper.selectPage(historyPage,queryWrapper);
+        return historyMapper.selectPage(historyPage, queryWrapper);
     }
 
     public Page<HistoryPo> getHistory(Integer page, Integer size, String deviceId, String sensorId) {
@@ -124,7 +139,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
         } else {
             queryWrapper.eq("device_id", deviceId).eq("sensor_id", sensorId);
         }
-        return historyMapper.selectPage(historyPage,queryWrapper);
+        return historyMapper.selectPage(historyPage, queryWrapper);
     }
 
     @Override
@@ -178,7 +193,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
             return Result.error(ResultCode.MISSING, "参数不可为空");
         }
         Page<DevicePo> devices = list(page, size);
-        if (devices == null){
+        if (devices == null) {
             response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS, "获取失败");
         }
@@ -200,12 +215,12 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
             response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS, "未查询到设备");
         }
-        if (UserContext.getPermissions() == 0){
+        if (UserContext.getPermissions() == 0) {
             if (!this.projectClient.getProject(device.getOwner()).getData().getOwner().equals(UserContext.getUser())) {
                 response.setStatus(403);
                 return Result.error(ResultCode.PERMISSIONS_ERROR, "权限不足");
             }
-        }else if (UserContext.getPermissions() == 1){
+        } else if (UserContext.getPermissions() == 1) {
             if (!device.getCreateUser().equals(UserContext.getUser())) {
                 response.setStatus(403);
                 return Result.error(ResultCode.PERMISSIONS_ERROR, "权限不足");
@@ -215,20 +230,20 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
     }
 
     @Override
-    public Result<List<DeviceDTO>> selectDevice(List<String> keys,List<String> values, Integer page, Integer size, HttpServletResponse response) {
+    public Result<List<DeviceDTO>> selectDevice(List<String> keys, List<String> values, Integer page, Integer size, HttpServletResponse response) {
         if (keys == null || values == null || keys.size() != values.size()) {
             response.setStatus(412);
             return Result.error(ResultCode.MISSING, "参数不可为空");
         }
-        if (UserContext.getPermissions() == 1){
-            if (keys.contains("create_user")){
+        if (UserContext.getPermissions() == 1) {
+            if (keys.contains("create_user")) {
                 response.setStatus(403);
-                return Result.error(ResultCode.ERROR_PARAMETERS,"不符合权限的参数");
+                return Result.error(ResultCode.ERROR_PARAMETERS, "不符合权限的参数");
             }
-        }else if (UserContext.getPermissions() == 0){
-            if (keys.contains("owner") || keys.contains("create_user")){
+        } else if (UserContext.getPermissions() == 0) {
+            if (keys.contains("owner") || keys.contains("create_user")) {
                 response.setStatus(403);
-                return Result.error(ResultCode.ERROR_PARAMETERS,"不符合权限的参数");
+                return Result.error(ResultCode.ERROR_PARAMETERS, "不符合权限的参数");
             }
         }
         Page<DevicePo> devicePoPage = this.select(keys, values, size, page);
@@ -236,14 +251,14 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
             response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS, "未查询到设备");
         }
-        if (UserContext.getPermissions() == 0){
+        if (UserContext.getPermissions() == 0) {
             Result<List<ProjectDTO>> list = this.projectClient.list(1, -1);
             Set<String> set = new HashSet<>();
-            for (ProjectDTO projectDTO : list.getData()){
+            for (ProjectDTO projectDTO : list.getData()) {
                 set.add(projectDTO.getId());
             }
-            for (int i = 0; i < devicePoPage.getRecords().size();i++) {
-                if (!set.contains(devicePoPage.getRecords().get(i).getOwner())){
+            for (int i = 0; i < devicePoPage.getRecords().size(); i++) {
+                if (!set.contains(devicePoPage.getRecords().get(i).getOwner())) {
                     devicePoPage.getRecords().remove(i);
                     i--;
                 }
@@ -267,18 +282,16 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
             JSONObject jsonObject1 = new JSONObject();
             jsonObject1.put("device", device);
             jsonObject1.put("command", controlVo.getValue());
-            jsonObject1.put("cmdid", this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-");
-            redisUtil.sendMsg("tc", jsonObject1.toString());
+            this.rabbitTemplate.convertAndSend("tc", jsonObject1.toString());
             return Result.success("发送成功");
         }
-        SensorDTO sensor = sensorClient.getSensor(controlVo.getTag(),device).getData();
+        SensorDTO sensor = sensorClient.getSensor(controlVo.getTag(), device).getData();
         if (sensor == null) {
             response.setStatus(412);
             return Result.error(ResultCode.ERROR_PARAMETERS, "未查询到执行器");
         }
         if ("TCP-T".equals(device1.getProtocol())) {
             JSONObject jsonObject1 = new JSONObject();
-            jsonObject1.put("cmdid", this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-");
             jsonObject1.put("device", device);
             if (sensor.getType() == 2) {
                 StringBuilder command = new StringBuilder(Integer.toHexString(Integer.parseInt(controlVo.getValue())));
@@ -301,21 +314,20 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
                 jsonObject1.put("func", "06");
             }
             jsonObject1.put("addr", sensor.getAddr());
-            redisUtil.sendMsg("tc", jsonObject1.toString());
+            this.rabbitTemplate.convertAndSend("tc", jsonObject1.toString());
         } else {
             JSONObject jsonObject1 = new JSONObject();
-            jsonObject1.put("cmdid", this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-" + this.getRandomString(5) + "-");
             jsonObject1.put("device", device);
             jsonObject1.put("tag", controlVo.getTag());
             jsonObject1.put("data", Integer.valueOf(controlVo.getValue()));
-            redisUtil.sendMsg("control", jsonObject1.toString());
+            this.rabbitTemplate.convertAndSend("control", jsonObject1.toString());
         }
 
         return Result.success("发送成功");
     }
 
     @Override
-    public Result<List<HistoryDTO>> getHistory(Integer page, Integer size, String deviceId, String sensorId,HttpServletResponse response) {
+    public Result<List<HistoryDTO>> getHistory(Integer page, Integer size, String deviceId, String sensorId, HttpServletResponse response) {
         if (deviceId == null) {
             response.setStatus(412);
             return Result.error(ResultCode.MISSING, "参数不可为空");
@@ -329,7 +341,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
     }
 
     @Override
-    public Result<List<HistoryDTO>> getHistoryByTime(Integer page, Integer size,String deviceId, String sensorId, Long startTime, Long endTime, HttpServletResponse response) {
+    public Result<List<HistoryDTO>> getHistoryByTime(Integer page, Integer size, String deviceId, String sensorId, Long startTime, Long endTime, HttpServletResponse response) {
         if (deviceId == null || startTime == null) {
             response.setStatus(412);
             return Result.error(ResultCode.MISSING, "参数不可为空");

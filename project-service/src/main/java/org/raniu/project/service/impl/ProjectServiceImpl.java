@@ -49,10 +49,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, ProjectPo> im
             queryWrapper.eq("owner",  UserContext.getUser());
         } else if (UserContext.getPermissions() == PermissionsEnum.ADMIN.ordinal()) {
             queryWrapper.eq("create_user",  UserContext.getUser());
-        } else if (UserContext.getPermissions() == PermissionsEnum.SUPER_ADMIN.ordinal()) {
-            return this.projectMapper.findWithType(projectPage, queryWrapper);
         } else {
-            return null;
+            return this.projectMapper.findWithType(projectPage, queryWrapper);
         }
         return this.projectMapper.findWithType(projectPage, queryWrapper);
     }
@@ -64,10 +62,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, ProjectPo> im
             queryWrapper.like("name", key).eq("owner",  UserContext.getUser());
         } else if (UserContext.getPermissions() == PermissionsEnum.ADMIN.ordinal()) {
             queryWrapper.like("name", key).eq("create_user",  UserContext.getUser());
-        } else if (UserContext.getPermissions() == PermissionsEnum.SUPER_ADMIN.ordinal()) {
-            queryWrapper.like("name", key);
         } else {
-            return null;
+            queryWrapper.like("name", key);
         }
         return this.projectMapper.findWithType(projectPage, queryWrapper);
     }

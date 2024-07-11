@@ -3,6 +3,8 @@ package org.raniu.sse.utils;
 import lombok.Data;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
+
 /**
  * @projectName: IOTCloud
  * @package: org.raniu.ssecommon
@@ -16,6 +18,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Data
 public class Sse {
 
-    private String[] devices;
+    private List<String> devices;
     private SseEmitter sseEmitter;
 }

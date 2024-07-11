@@ -11,6 +11,8 @@ spring:
           - data-id: jdbc-config.yaml
           - data-id: jackson-config.yaml
           - data-id: cors-config.yaml
+          - data-id: rabbitmq-config.yaml
+          - data-id: redis-config.yaml
     sentinel:
       transport:
         dashboard: 127.0.0.1:8080

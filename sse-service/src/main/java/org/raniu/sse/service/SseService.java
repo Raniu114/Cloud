@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.raniu.api.vo.Result;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
+
 /**
  * @projectName: IOTCloud
  * @package: org.raniu.sse.service
@@ -14,7 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
  * @version: 1.0
  */
 public interface SseService {
-    SseEmitter createSse(String uid, String[] devices, HttpServletResponse response);
+    SseEmitter createSse(String uid, List<String> devices, HttpServletResponse response);
 
     Result<String> closeSse(String uid, HttpServletResponse response);
 }

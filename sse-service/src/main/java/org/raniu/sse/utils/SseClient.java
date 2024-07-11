@@ -30,7 +30,7 @@ public class SseClient {
     public Map<String, List<String>> subClients = new HashMap<>();
 
 
-    public SseEmitter createSseEmitter(String id, String... devices) {
+    public SseEmitter createSseEmitter(String id, List<String> devices) {
         SseEmitter sseEmitter = new SseEmitter(0l);
         Sse sse = new Sse();
         sse.setSseEmitter(sseEmitter);

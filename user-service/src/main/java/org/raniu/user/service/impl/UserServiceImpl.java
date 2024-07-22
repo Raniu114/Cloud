@@ -213,6 +213,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> implements 
         user.setEmail(userVo.getEmail());
         user.setPhone(userVo.getPhone());
         user.setCreatTime(System.currentTimeMillis());
+        user.setAuth(userVo.getAuth());
         if (save(user)) {
             return Result.success("添加成功");
         } else {

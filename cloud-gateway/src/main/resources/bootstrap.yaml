@@ -9,6 +9,7 @@ spring:
         shared-configs:
           - data-id: api-gateway.yaml
           - data-id: jackson-config.yaml
+          - data-id: ssl-config.yaml
     sentinel:
       transport:
         dashboard: 127.0.0.1:8080

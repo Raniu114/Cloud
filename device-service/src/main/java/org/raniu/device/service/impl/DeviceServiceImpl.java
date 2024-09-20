@@ -282,7 +282,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
             JSONObject jsonObject1 = new JSONObject();
             jsonObject1.put("device", device);
             jsonObject1.put("command", controlVo.getValue());
-            this.rabbitTemplate.convertAndSend("tc", jsonObject1.toString());
+            this.rabbitTemplate.convertAndSend("iot","tc", jsonObject1.toString());
             return Result.success("发送成功");
         }
         SensorDTO sensor = sensorClient.getSensor(controlVo.getTag(), device).getData();
@@ -295,8 +295,9 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
             jsonObject1.put("device", device);
             if (sensor.getType() == 2) {
                 StringBuilder command = new StringBuilder(Integer.toHexString(Integer.parseInt(controlVo.getValue())));
-                while (command.length() % 4 != 0)
+                while (command.length() % 4 != 0) {
                     command.insert(0, "0");
+                }
                 jsonObject1.put("command", command.toString());
             } else {
                 if ("1".equals(controlVo.getValue())) {
@@ -314,13 +315,13 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, DevicePo> imple
                 jsonObject1.put("func", "06");
             }
             jsonObject1.put("addr", sensor.getAddr());
-            this.rabbitTemplate.convertAndSend("tc", jsonObject1.toString());
+            this.rabbitTemplate.convertAndSend("iot","tc", jsonObject1.toString());
         } else {
             JSONObject jsonObject1 = new JSONObject();
             jsonObject1.put("device", device);
             jsonObject1.put("tag", controlVo.getTag());
             jsonObject1.put("data", Integer.valueOf(controlVo.getValue()));
-            this.rabbitTemplate.convertAndSend("control", jsonObject1.toString());
+            this.rabbitTemplate.convertAndSend("iot","control", jsonObject1.toString());
         }
 
         return Result.success("发送成功");

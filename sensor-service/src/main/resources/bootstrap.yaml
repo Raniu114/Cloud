@@ -15,3 +15,18 @@ spring:
       transport:
         dashboard: 127.0.0.1:8080
         port: 8719
+      datasource:
+        ds1:
+          nacos:
+            server-addr: 127.0.0.1:8848
+            data-id: all-service-flow-rule.json
+            rule-type: flow
+            group-id: SENTINEL_PROVIDER_GROUP
+            data-type: json
+        ds2:
+          nacos:
+            server-addr: 127.0.0.1:8848
+            data-id: all-service-degrade-rule.json
+            group-id: SENTINEL_PROVIDER_GROUP
+            data-type: json
+            rule-type: degrade

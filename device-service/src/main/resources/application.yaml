@@ -13,3 +13,30 @@ iot:
     port: 6379
     password: 12345678
     database: 0
+
+spring:
+  shardingsphere:
+    datasource:
+      names: history
+      db:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://${iot.mysql.url}:${iot.mysql.port}/${iot.mysql.base}?characterEncoding=utf8&autoReconnect=true&allowMultiQueries=true&serverTimezone=GMT&useSSL=false&allowPublicKeyRetrieval=true
+        username: ${iot.mysql.username}
+        password: ${iot.mysql.password}
+      rules:
+        sharding:
+          tables:
+            history:
+              actualDataNodes: db.history
+              tableStrategy:
+                standard:
+                  shardingColumn: time
+                  shardingAlgorithmName: time-sharding-algorithm
+          shardingAlgorithms:
+            time-sharding-algorithm:
+              type: CLASS_BASED
+              props:
+                strategy: standard
+                algorithmClassName: org.raniu.device.config.sharding.TimeShardingAlgorithm
+

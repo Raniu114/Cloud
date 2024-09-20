@@ -14,6 +14,15 @@ spring:
       transport:
         dashboard: 127.0.0.1:8080
         port: 8719
+      datasource:
+        ds1:
+          nacos:
+            server-addr: 127.0.0.1:8848
+            data-id: gateway-system-rule.json
+            group-id: SENTINEL_PROVIDER_GROUP
+            data-type: json
+            rule-type: system
+
     gateway:
       discovery:
         locator:

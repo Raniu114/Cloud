@@ -10,13 +10,13 @@ import java.util.List;
  * @package: org.raniu.ssecommon
  * @className: Sse
  * @author: Raniu
- * @description: TODO
+ * @description: SSE Bean类型
  * @date: 2024/7/1 13:43
  * @version: 1.0
  */
 
 @Data
-public class Sse {
+public class SseBean {
 
     private List<String> devices;
     private SseEmitter sseEmitter;
